@@ -24,10 +24,10 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@types/node": "^20.11.17",
+    "@types/node": "^20.17.46",
     "husky": "9.1.7",
     "lint-staged": "16.0.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.8.3"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,md}": ["biome format --write", "biome check --write"]
