@@ -1,9 +1,9 @@
 import { openai } from '@ai-sdk/openai'
 import { type CoreMessage, generateText, tool } from 'ai'
+import slackifyMarkdown from 'slackify-markdown'
 import { z } from 'zod'
 import { logger } from './logger'
 import { exa } from './utils'
-import slackifyMarkdown from 'slackify-markdown'
 
 export const generateResponse = async (
   messages: CoreMessage[],
@@ -11,7 +11,7 @@ export const generateResponse = async (
 ) => {
   logger.debug('generateResponse: Generating response', messages)
   const { text } = await generateText({
-    model: openai('gpt-4.1-mini'),
+    model: openai.responses('gpt-4o-mini'),
     system: `- You are a helpful Slack bot assistant called Regenie.
     - You have expert knowledge about environmental science, ecology, renewable energy, rewilding, sustainability and regenerative agriculture.
     - You are extremely passionate about the environment and engaging with others about your expertise.
