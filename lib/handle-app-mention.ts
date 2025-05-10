@@ -51,12 +51,12 @@ export async function handleNewAppMention(event: AppMentionEvent, botUserId: str
     logger.debug(`handleNewAppMention: Thread ${thread_ts} has ${messages.length} messages`)
     const result = await generateResponse(messages, updateMessage)
     logger.debug('handleNewAppMention: Generated response', result)
-    await updateMessage(result)
+    await updateMessage(result.response)
   } else {
     logger.debug('handleNewAppMention: Generating response')
     const result = await generateResponse([{ role: 'user', content: event.text }], updateMessage)
     logger.debug('handleNewAppMention: Generated response', result)
-    await updateMessage(result)
+    await updateMessage(result.response)
   }
 
   logger.debug('handleNewAppMention: Done')
