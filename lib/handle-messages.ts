@@ -14,7 +14,7 @@ export async function assistantThreadMessage(event: AssistantThreadStartedEvent)
   await client.chat.postMessage({
     channel: channel_id,
     thread_ts: thread_ts,
-    text: "Hello, I'm an AI assistant built with the AI SDK by Vercel!",
+    text: "Hello, I'm Regenie! 🌱 Your eco-focused AI assistant ready to help with environmental science, sustainability, and regenerative topics! 🌍",
   })
 
   logger.debug('assistantThreadMessage: Setting suggested prompts')
@@ -24,11 +24,11 @@ export async function assistantThreadMessage(event: AssistantThreadStartedEvent)
     prompts: [
       {
         title: 'Get the weather',
-        message: 'What is the current weather in London?',
+        message: 'What is the current weather in the UK?',
       },
       {
         title: 'Get the news',
-        message: 'What is the latest Premier League news from the BBC?',
+        message: 'What is the latest news about renewable energy?',
       },
     ],
   })
