@@ -1,5 +1,6 @@
 # Regenie
 
-## Todo
-- [ ] Add detailed logging
-- [ ] Add formatting and linting
+## Roadmap
+- ✅ Detailed logging
+- ✅ Formatting and linting
+- ⬜ Markdown to Slack mrkdwn conversion
