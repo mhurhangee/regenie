@@ -30,7 +30,6 @@ export const generateResponse = async (
           .array(
             z.string().describe('A follow up prompts for the user to continue the conversation')
           )
-          .optional()
           .describe('Optional follow up prompts for the user to continue the conversation'),
       }),
     }),
