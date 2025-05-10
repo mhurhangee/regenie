@@ -72,6 +72,42 @@ export const updateStatusUtil = (channel: string, thread_ts: string) => {
   }
 }
 
+export const updateTitleUtil = (channel: string, thread_ts: string) => {
+  return async (title: string) => {
+    logger.debug('updateTitleUtil: Updating title')
+    await client.assistant.threads.setTitle({
+      channel_id: channel,
+      thread_ts: thread_ts,
+      title: title,
+    })
+  }
+}
+
+export const setSuggestedPromptsUtil = (channel: string, thread_ts: string) => {
+  return async (promptTexts: string[], title = 'Follow ups') => {
+    logger.debug('setSuggestedPromptsUtil: Setting suggested prompts')
+
+    if (promptTexts.length === 0) {
+      logger.debug('setSuggestedPromptsUtil: No prompts provided, skipping')
+      return
+    }
+
+    // Create prompts array with the required format
+    const prompts = promptTexts.map((text) => ({
+      title: text,
+      message: text,
+    }))
+
+    // Ensure we have at least one prompt (required by Slack API)
+    await client.assistant.threads.setSuggestedPrompts({
+      channel_id: channel,
+      thread_ts: thread_ts,
+      title,
+      prompts: [prompts[0], ...prompts.slice(1)], // This ensures the type is correct
+    })
+  }
+}
+
 export async function getThread(
   channel_id: string,
   thread_ts: string,

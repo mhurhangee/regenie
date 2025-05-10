@@ -1,7 +1,13 @@
 import type { AssistantThreadStartedEvent, GenericMessageEvent } from '@slack/web-api'
 import { generateResponse } from './generate-response'
 import { logger } from './logger'
-import { client, getThread, updateStatusUtil } from './slack-utils'
+import {
+  client,
+  getThread,
+  setSuggestedPromptsUtil,
+  updateStatusUtil,
+  updateTitleUtil,
+} from './slack-utils'
 
 export async function assistantThreadMessage(event: AssistantThreadStartedEvent) {
   const { channel_id, thread_ts } = event.assistant_thread
@@ -18,20 +24,14 @@ export async function assistantThreadMessage(event: AssistantThreadStartedEvent)
   })
 
   logger.debug('assistantThreadMessage: Setting suggested prompts')
-  await client.assistant.threads.setSuggestedPrompts({
-    channel_id: channel_id,
-    thread_ts: thread_ts,
-    prompts: [
-      {
-        title: 'Get the weather',
-        message: 'What is the current weather in the UK?',
-      },
-      {
-        title: 'Get the news',
-        message: 'What is the latest news about renewable energy?',
-      },
+  const setSuggestedPrompts = setSuggestedPromptsUtil(channel_id, thread_ts)
+  await setSuggestedPrompts(
+    [
+      'What is the current weather in London?',
+      'What is the latest Premier League news from the BBC?',
     ],
-  })
+    'Initial suggestions'
+  )
   logger.debug('assistantThreadMessage: Done')
 }
 
@@ -62,18 +62,26 @@ export async function handleNewAssistantMessage(event: GenericMessageEvent, botU
   await client.chat.postMessage({
     channel: channel,
     thread_ts: thread_ts,
-    text: result,
+    text: result.response,
     unfurl_links: false,
     blocks: [
       {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: result,
+          text: result.response,
         },
       },
     ],
   })
+
+  logger.debug('handleNewAssistantMessage: Updating title')
+  const updateTitle = updateTitleUtil(channel, thread_ts)
+  await updateTitle(result.threadTitle)
+
+  logger.debug('handleNewAssistantMessage: Setting suggested prompts')
+  const setSuggestedPrompts = setSuggestedPromptsUtil(channel, thread_ts)
+  await setSuggestedPrompts(result.followUps || [])
 
   logger.debug('handleNewAssistantMessage: Updating status')
   await updateStatus('')

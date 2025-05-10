@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai'
-import { type CoreMessage, generateText, tool } from 'ai'
+import { type CoreMessage, Output, generateText, tool } from 'ai'
 import slackifyMarkdown from 'slackify-markdown'
 import { z } from 'zod'
 import { logger } from './logger'
@@ -10,7 +10,7 @@ export const generateResponse = async (
   updateStatus?: (status: string) => void
 ) => {
   logger.debug('generateResponse: Generating response', messages)
-  const { text } = await generateText({
+  const { experimental_output } = await generateText({
     model: openai.responses('gpt-4o-mini'),
     system: `- You are a helpful Slack bot assistant called Regenie.
     - You have expert knowledge about environmental science, ecology, renewable energy, rewilding, sustainability and regenerative agriculture.
@@ -22,6 +22,18 @@ export const generateResponse = async (
     - Current date is: ${new Date().toISOString().split('T')[0]}
     - Make sure to ALWAYS include sources in your final response if you use web search. Put sources inline if possible.`,
     messages,
+    experimental_output: Output.object({
+      schema: z.object({
+        threadTitle: z.string().describe('The title of the thread'),
+        response: z.string().describe('The response to the user'),
+        followUps: z
+          .array(
+            z.string().describe('A follow up prompts for the user to continue the conversation')
+          )
+          .optional()
+          .describe('Optional follow up prompts for the user to continue the conversation'),
+      }),
+    }),
     maxSteps: 10,
     tools: {
       getWeather: tool({
@@ -80,9 +92,14 @@ export const generateResponse = async (
     },
   })
 
-  logger.debug('generateResponse: Generated response', text)
+  logger.debug('generateResponse: Generated response object', experimental_output)
   // Convert markdown to Slack mrkdwn format
-  const mrkdwnText = slackifyMarkdown(text)
+  const mrkdwnText = slackifyMarkdown(experimental_output.response)
   logger.debug('generateResponse: MRKDWN Text', mrkdwnText)
-  return mrkdwnText
+
+  return {
+    threadTitle: experimental_output.threadTitle || '',
+    response: mrkdwnText,
+    followUps: experimental_output.followUps || [],
+  }
 }
