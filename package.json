@@ -8,7 +8,8 @@
     "start": "node dist/index.js",
     "format": "biome format --write .",
     "lint": "biome lint .",
-    "check": "biome check --write ."
+    "check": "biome check --write .",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "m.hurhangee@me.com",
@@ -22,8 +23,13 @@
     "zod": "^3.24.4"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
-    "@types/node": "^22.15.17",
-    "typescript": "^5.8.3"
+    "@biomejs/biome": "1.9.4",
+    "@types/node": "^20.11.17",
+    "husky": "9.1.7",
+    "lint-staged": "16.0.0",
+    "typescript": "^5.3.3"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,md}": ["biome format --write", "biome check --write"]
   }
 }
