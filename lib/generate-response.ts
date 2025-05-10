@@ -2,11 +2,13 @@ import { openai } from "@ai-sdk/openai";
 import { CoreMessage, generateText, tool } from "ai";
 import { z } from "zod";
 import { exa } from "./utils";
+import { logger } from "./logger";
 
 export const generateResponse = async (
   messages: CoreMessage[],
   updateStatus?: (status: string) => void,
 ) => {
+  logger.debug("generateResponse: Generating response", messages);
   const { text } = await generateText({
     model: openai("gpt-4.1-mini"),
     system: `You are a Slack bot assistant Keep your responses concise and to the point.
@@ -24,6 +26,7 @@ export const generateResponse = async (
           city: z.string(),
         }),
         execute: async ({ latitude, longitude, city }) => {
+          logger.debug("generateResponse: Getting weather", { latitude, longitude, city });
           updateStatus?.(`is getting weather for ${city}...`);
 
           const response = await fetch(
@@ -51,6 +54,7 @@ export const generateResponse = async (
             ),
         }),
         execute: async ({ query, specificDomain }) => {
+          logger.debug("generateResponse: Searching the web", { query, specificDomain });
           updateStatus?.(`is searching the web for ${query}...`);
           const { results } = await exa.searchAndContents(query, {
             livecrawl: "always",
@@ -70,6 +74,7 @@ export const generateResponse = async (
     },
   });
 
+  logger.debug("generateResponse: Generated response", text);
   // Convert markdown to Slack mrkdwn format
   return text.replace(/\[(.*?)\]\((.*?)\)/g, "<$2|$1>").replace(/\*\*/g, "*");
 };
