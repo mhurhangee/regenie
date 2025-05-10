@@ -1,5 +1,5 @@
 {
-  "name": "ai-sdk-slack-chatbot",
+  "name": "regenie",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,7 +8,7 @@
     "start": "node dist/index.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "m.hurhangee@me.com",
   "license": "ISC",
   "dependencies": {
     "@ai-sdk/openai": "^1.1.14",

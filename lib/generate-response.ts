@@ -8,7 +8,7 @@ export const generateResponse = async (
   updateStatus?: (status: string) => void,
 ) => {
   const { text } = await generateText({
-    model: openai("gpt-4o"),
+    model: openai("gpt-4.1-mini"),
     system: `You are a Slack bot assistant Keep your responses concise and to the point.
     - Do not tag users.
     - Current date is: ${new Date().toISOString().split("T")[0]}
