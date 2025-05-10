@@ -2,14 +2,12 @@ import { openai } from '@ai-sdk/openai'
 import { type CoreMessage, Output, generateText, tool } from 'ai'
 import slackifyMarkdown from 'slackify-markdown'
 import { z } from 'zod'
-import { logger } from './logger'
 import { exa } from './utils'
 
 export const generateResponse = async (
   messages: CoreMessage[],
   updateStatus?: (status: string) => void
 ) => {
-  logger.debug('generateResponse: Generating response', messages)
   const { experimental_output } = await generateText({
     model: openai.responses('gpt-4o-mini'),
     system: `- You are a helpful Slack bot assistant called Regenie.
@@ -43,7 +41,6 @@ export const generateResponse = async (
           city: z.string(),
         }),
         execute: async ({ latitude, longitude, city }) => {
-          logger.debug('generateResponse: Getting weather', { latitude, longitude, city })
           updateStatus?.(`is getting weather for ${city}...`)
 
           const response = await fetch(
@@ -71,7 +68,6 @@ export const generateResponse = async (
             ),
         }),
         execute: async ({ query, specificDomain }) => {
-          logger.debug('generateResponse: Searching the web', { query, specificDomain })
           updateStatus?.(`is searching the web for ${query}...`)
           const { results } = await exa.searchAndContents(query, {
             livecrawl: 'always',
@@ -91,10 +87,8 @@ export const generateResponse = async (
     },
   })
 
-  logger.debug('generateResponse: Generated response object', experimental_output)
   // Convert markdown to Slack mrkdwn format
   const mrkdwnText = slackifyMarkdown(experimental_output.response)
-  logger.debug('generateResponse: MRKDWN Text', mrkdwnText)
 
   return {
     threadTitle: experimental_output.threadTitle || '',
