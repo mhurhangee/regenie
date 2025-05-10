@@ -14,7 +14,7 @@ export async function assistantThreadMessage(event: AssistantThreadStartedEvent)
   await client.chat.postMessage({
     channel: channel_id,
     thread_ts: thread_ts,
-    text: "Hello, I'm an AI assistant built with the AI SDK by Vercel!",
+    text: "Hello, I'm Regenie, an AI Slack bot assistant!",
   })
 
   logger.debug('assistantThreadMessage: Setting suggested prompts')

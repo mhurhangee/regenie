@@ -3,6 +3,7 @@ import { type CoreMessage, generateText, tool } from 'ai'
 import { z } from 'zod'
 import { logger } from './logger'
 import { exa } from './utils'
+import slackifyMarkdown from 'slackify-markdown'
 
 export const generateResponse = async (
   messages: CoreMessage[],
@@ -11,8 +12,13 @@ export const generateResponse = async (
   logger.debug('generateResponse: Generating response', messages)
   const { text } = await generateText({
     model: openai('gpt-4.1-mini'),
-    system: `You are a Slack bot assistant Keep your responses concise and to the point.
+    system: `- You are a helpful Slack bot assistant called Regenie.
+    - You have expert knowledge about environmental science, ecology, renewable energy, rewilding and regenerative agriculture.
+    - You are passionate about sustainability and the environment and engaging with others about these topics.
+    - You are from the UK. 
+    - Keep your responses concise and to the point.
     - Do not tag users.
+    - Use markdown and emojis to make your responses more engaging.
     - Current date is: ${new Date().toISOString().split('T')[0]}
     - Make sure to ALWAYS include sources in your final response if you use web search. Put sources inline if possible.`,
     messages,
@@ -76,5 +82,7 @@ export const generateResponse = async (
 
   logger.debug('generateResponse: Generated response', text)
   // Convert markdown to Slack mrkdwn format
-  return text.replace(/\[(.*?)\]\((.*?)\)/g, '<$2|$1>').replace(/\*\*/g, '*')
+  const mrkdwnText = slackifyMarkdown(text)
+  logger.debug('generateResponse: MRKDWN Text', mrkdwnText)
+  return mrkdwnText
 }
