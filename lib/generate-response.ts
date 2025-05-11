@@ -2,12 +2,7 @@ import OpenAI from 'openai'
 import { zodTextFormat } from 'openai/helpers/zod'
 import slackifyMarkdown from 'slackify-markdown'
 import { DEFAULT_AI_SETTINGS } from './constants'
-
-// Define the type for messages to match the CoreMessage structure
-export type Message = {
-  role: 'user' | 'assistant' | 'system'
-  content: string
-}
+import type { Message } from './types'
 
 // Initialize the OpenAI client
 const openai = new OpenAI({
@@ -31,10 +26,10 @@ export const generateResponse = async (
   const systemMessage = {
     role: 'system' as const,
     content: `${DEFAULT_AI_SETTINGS.systemPrompt}\n\n${DEFAULT_AI_SETTINGS.structuredAdditionPrompt}`,
-  }
+  } as Message
 
   // Prepare the input messages with system message first
-  const inputMessages = [systemMessage, ...messages]
+  const inputMessages = [systemMessage, ...messages] as Message[]
 
   let lastError: Error | null = null
 

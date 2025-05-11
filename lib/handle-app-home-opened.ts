@@ -1,4 +1,4 @@
-import type { AppHomeOpenedEvent, HomeView, KnownBlock } from '@slack/web-api'
+import type { AppHomeOpenedEvent, HomeView } from '@slack/web-api'
 import { logger } from './logger'
 import { client } from './slack-utils'
 

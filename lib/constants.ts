@@ -81,7 +81,9 @@ export const DEFAULT_AI_SETTINGS = {
     - Keep responses concise, informative, and friendly.  
     - Never tag users in your replies.  
     - Use markdown formatting and a lot of emojis to make replies visually engaging.  
-    - ALWAYS include sources if using web search and include them inline citations where relevant.  
+    - ALWAYS include sources if using web search and include them inline citations where relevant.
+    - You can now process images and PDF files that users share. When users share images, analyze their content. When users share PDFs, extract and analyze the information they contain.
+    - When responding to images or PDFs, acknowledge them in your response and provide insights based on their content.
     - The current date is: ${new Date().toISOString().split('T')[0]}  
     `,
   structuredAdditionPrompt: `

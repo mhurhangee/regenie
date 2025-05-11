@@ -1,7 +1,7 @@
 import crypto from 'node:crypto'
 import { WebClient } from '@slack/web-api'
 import { DEFAULT_AI_SETTINGS } from './constants'
-import type { Message } from './generate-response'
+import type { Message } from './types'
 
 const signingSecret = process.env.SLACK_SIGNING_SECRET || ''
 
@@ -107,26 +107,117 @@ export async function getThread(
     throw new Error('No messages found in thread')
   }
 
-  const result = messages
-    .map((message) => {
+  const result = await Promise.all(
+    messages.map(async (message) => {
       const isBot = !!message.bot_id
-      if (!message.text) return null
+      if (!message.text && !message.files) return null
 
       // For app mentions, remove the mention prefix
       // For IM messages, keep the full text
-      let content = message.text
-      if (!isBot && content.includes(`<@${botUserId}>`)) {
-        content = content.replace(`<@${botUserId}> `, '')
+      let text = message.text || ''
+      if (!isBot && text.includes(`<@${botUserId}>`)) {
+        text = text.replace(`<@${botUserId}> `, '')
       }
 
-      return {
-        role: isBot ? 'assistant' : 'user',
-        content: content,
-      } as Message
-    })
-    .filter((msg): msg is Message => msg !== null)
+      // If there are no files, return a simple text message
+      if (!message.files || message.files.length === 0) {
+        return {
+          role: isBot ? 'assistant' : 'user',
+          content: text,
+        } as Message
+      }
 
-  return result
+      // If there are files, process them and create a content array
+      const contentItems = []
+
+      // Add text if it exists
+      if (text) {
+        contentItems.push({
+          type: 'input_text',
+          text: text,
+        })
+      }
+
+      // Process each file
+      for (const file of message.files) {
+        try {
+          // Skip files without an ID
+          if (!file.id) {
+            console.warn('File without ID encountered, skipping')
+            continue
+          }
+
+          // Get the file content
+          const fileData = await getFileContent(file.id)
+
+          if (file.mimetype?.startsWith('image/')) {
+            // Handle image files
+            contentItems.push({
+              type: 'input_image',
+              image_url: `data:${file.mimetype};base64,${fileData.toString('base64')}`,
+            })
+          } else if (file.mimetype === 'application/pdf') {
+            // Handle PDF files
+            contentItems.push({
+              type: 'input_file',
+              filename: file.name || 'file.pdf',
+              file_data: `data:application/pdf;base64,${fileData.toString('base64')}`,
+            })
+          }
+          // Ignore other file types for now
+        } catch (error) {
+          console.error(`Error processing file ${file.id}:`, error)
+          // Continue with other files if one fails
+        }
+      }
+
+      // If we have content items, return a message with content array
+      if (contentItems.length > 0) {
+        return {
+          role: isBot ? 'assistant' : 'user',
+          content: contentItems,
+        } as Message
+      }
+
+      return null
+    })
+  )
+
+  return result.filter((msg): msg is Message => msg !== null)
+}
+
+/**
+ * Downloads file content from Slack
+ * @param fileId The ID of the file to download
+ * @returns Buffer containing the file data
+ */
+export async function getFileContent(fileId: string): Promise<Buffer> {
+  try {
+    // Get file info to get the URL
+    const fileInfo = await client.files.info({ file: fileId })
+
+    if (!fileInfo.file?.url_private) {
+      throw new Error(`No URL found for file ${fileId}`)
+    }
+
+    // Download the file using fetch with the Slack token for authentication
+    const response = await fetch(fileInfo.file.url_private, {
+      headers: {
+        Authorization: `Bearer ${process.env.SLACK_BOT_TOKEN}`,
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to download file: ${response.status} ${response.statusText}`)
+    }
+
+    // Convert the response to an ArrayBuffer and then to a Buffer
+    const arrayBuffer = await response.arrayBuffer()
+    return Buffer.from(arrayBuffer)
+  } catch (error) {
+    console.error(`Error downloading file ${fileId}:`, error)
+    throw error
+  }
 }
 
 export const getBotId = async () => {
