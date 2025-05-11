@@ -82,6 +82,10 @@ export const handleAppHomeOpened = async (event: AppHomeOpenedEvent) => {
             },
             {
               type: 'mrkdwn',
+              text: '🌐 *Powerful Web Search:* For up to date sources',
+            },
+            {
+              type: 'mrkdwn',
               text: '⚡ *Fast Responses:* Optimized for quick, helpful answers',
             },
             {
