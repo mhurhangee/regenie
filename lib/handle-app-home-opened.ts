@@ -25,7 +25,7 @@ export const handleAppHomeOpened = async (event: AppHomeOpenedEvent) => {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: 'Regenie is your AI-powered assistant for Slack. Get instant help, generate content, answer questions, and boost your productivity without leaving your workspace.',
+            text: 'Regenie is your eco-focused AI-powered assistant for Slack. Get instant help, generate content, answer questions, and boost your productivity without leaving your workspace.',
           },
         },
 
@@ -52,6 +52,10 @@ export const handleAppHomeOpened = async (event: AppHomeOpenedEvent) => {
             {
               type: 'mrkdwn',
               text: '🔄 *Channel Mention:* Use `@Regenie` in any channel to get help',
+            },
+            {
+              type: 'mrkdwn',
+              text: '↗️ *Side Panel:* Add to the top bar for easy access, click the ⫶ and add to top bar ',
             },
           ],
         },
@@ -83,10 +87,6 @@ export const handleAppHomeOpened = async (event: AppHomeOpenedEvent) => {
             {
               type: 'mrkdwn',
               text: '🔍 *Context Awareness:* Remembers conversation history',
-            },
-            {
-              type: 'mrkdwn',
-              text: '📊 *Data Analysis:* Help with interpreting data and creating visualizations',
             },
             {
               type: 'mrkdwn',
@@ -122,10 +122,6 @@ export const handleAppHomeOpened = async (event: AppHomeOpenedEvent) => {
             {
               type: 'mrkdwn',
               text: '📋 *Lists:* Ask for information in list format for better readability',
-            },
-            {
-              type: 'mrkdwn',
-              text: '🔤 *Code Formatting:* Code will be properly formatted in responses',
             },
           ],
         },
