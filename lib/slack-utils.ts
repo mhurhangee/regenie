@@ -1,6 +1,8 @@
 import crypto from 'node:crypto'
 import { WebClient } from '@slack/web-api'
+import type { AppMentionEvent, FileShareMessageEvent } from '@slack/web-api'
 import { DEFAULT_AI_SETTINGS } from './constants'
+import { ERRORS } from './constants'
 import type { Message } from './types'
 
 const signingSecret = process.env.SLACK_SIGNING_SECRET || ''
@@ -58,6 +60,31 @@ export const updateStatusUtil = (channel: string, thread_ts: string) => {
       status: status,
     })
   }
+}
+
+export const updateMessageAsStatusUtil = async (
+  initialStatus: string,
+  event: AppMentionEvent | FileShareMessageEvent
+) => {
+  const initialMessage = await client.chat.postMessage({
+    channel: event.channel,
+    thread_ts: event.thread_ts ?? event.ts,
+    text: initialStatus,
+  })
+
+  if (!initialMessage || !initialMessage.ts) {
+    throw new Error(ERRORS.initialMessage)
+  }
+
+  const updateMessage = async (status: string) => {
+    await client.chat.update({
+      channel: event.channel,
+      ts: initialMessage.ts as string,
+      text: status,
+    })
+  }
+
+  return updateMessage
 }
 
 export const updateTitleUtil = (channel: string, thread_ts: string) => {

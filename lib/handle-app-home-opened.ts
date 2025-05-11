@@ -82,7 +82,6 @@ export const handleAppHomeOpened = async (event: AppHomeOpenedEvent) => {
             text: '*Features*',
           },
         },
-
         {
           type: 'context',
           elements: [
@@ -98,6 +97,24 @@ export const handleAppHomeOpened = async (event: AppHomeOpenedEvent) => {
             {
               type: 'mrkdwn',
               text: '🌐 *Powerful Web Search:* For the latest news and info',
+            },
+          ],
+        },
+        {
+          type: 'context',
+          elements: [
+            {
+              type: 'mrkdwn',
+              text: '🏞️ *Image and PDF:* Upload image and PDF files for AI insights',
+            },
+          ],
+        },
+        {
+          type: 'context',
+          elements: [
+            {
+              type: 'mrkdwn',
+              text: '🔄 *AI Follow-ups:* AI-assistance for exploring a topic',
             },
           ],
         },
