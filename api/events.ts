@@ -1,5 +1,6 @@
 import type { SlackEvent } from '@slack/web-api'
 import { waitUntil } from '@vercel/functions'
+import { handleAppHomeOpened } from '../lib/handle-app-home-opened'
 import { handleNewAppMention } from '../lib/handle-app-mention'
 import { assistantThreadMessage, handleNewAssistantMessage } from '../lib/handle-messages'
 import { logger } from '../lib/logger'
@@ -28,6 +29,10 @@ export async function POST(request: Request) {
 
     if (event.type === 'app_mention') {
       waitUntil(handleNewAppMention(event, botUserId))
+    }
+
+    if (event.type === 'app_home_opened') {
+      waitUntil(handleAppHomeOpened(event))
     }
 
     if (event.type === 'assistant_thread_started') {
