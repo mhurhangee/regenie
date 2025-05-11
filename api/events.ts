@@ -1,4 +1,4 @@
-import type { SlackEvent } from '@slack/web-api'
+import type { FileShareMessageEvent, GenericMessageEvent, SlackEvent } from '@slack/web-api'
 import { waitUntil } from '@vercel/functions'
 import { handleAppHomeOpened } from '../lib/handle-app-home-opened'
 import { handleNewAppMention } from '../lib/handle-app-mention'
@@ -39,15 +39,21 @@ export async function POST(request: Request) {
       waitUntil(assistantThreadMessage(event))
     }
 
-    if (
-      event.type === 'message' &&
-      !event.subtype &&
-      event.channel_type === 'im' &&
-      !event.bot_id &&
-      !event.bot_profile &&
-      event.bot_id !== botUserId
-    ) {
-      waitUntil(handleNewAssistantMessage(event, botUserId))
+    // Handle all message events in IM channels
+    if (event.type === 'message' && 'channel_type' in event && event.channel_type === 'im') {
+      // Check if it's not from a bot
+      const isFromBot =
+        ('bot_id' in event && event.bot_id) ||
+        'bot_profile' in event ||
+        ('bot_id' in event && event.bot_id === botUserId)
+
+      // Process if it's not from a bot and has a thread_ts (or is starting a thread)
+      if (!isFromBot && 'thread_ts' in event) {
+        // Handle both regular messages and file_share messages
+        if (!event.subtype || event.subtype === 'file_share') {
+          waitUntil(handleNewAssistantMessage(event, botUserId))
+        }
+      }
     }
 
     return new Response('Success!', { status: 200 })
