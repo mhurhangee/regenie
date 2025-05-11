@@ -11,13 +11,18 @@
 - ✅ Precommit hooks (Husky)
 - ✅ AI suggested prompts
 - ✅ AI suggested title
-- ⬜ Remove extreme logging to clean up code
+- ✅ Remove extreme logging to clean up code
+- ⬜ Add a constants file and move all constants there
+- ⬜ Consider whether to trim first two messages (in assistant threads) as they are always the same
 - ⬜ Improve prompt for follow ups
 - ⬜ Make structured data optional (i.e. allow for just text responses for app mentions etc)
+- ⬜ Add persona switching
 - ⬜ Better error handling for generateResponse
 - ⬜ Include a backup for structured data
 - ⬜ Investigate whether direct use of OpenAI API is possible and better for structured data
 - ⬜ Home page
 - ⬜ News specific tool (Tavily?)
 - ⬜ YouTube search tool (YouTube Data API?)
+- ⬜ Consider token limits
+
 
