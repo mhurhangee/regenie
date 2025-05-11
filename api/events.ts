@@ -27,7 +27,15 @@ export async function POST(request: Request) {
 
     const event = payload.event as SlackEvent
 
-    if (event.type === 'app_mention') {
+    // Handle app mentions, including those with file attachments
+    if (
+      event.type === 'app_mention' ||
+      (event.type === 'message' &&
+        event.subtype === 'file_share' &&
+        'text' in event &&
+        event.text &&
+        event.text.includes(`<@${botUserId}>`))
+    ) {
       waitUntil(handleNewAppMention(event, botUserId))
     }
 
@@ -39,15 +47,21 @@ export async function POST(request: Request) {
       waitUntil(assistantThreadMessage(event))
     }
 
-    if (
-      event.type === 'message' &&
-      !event.subtype &&
-      event.channel_type === 'im' &&
-      !event.bot_id &&
-      !event.bot_profile &&
-      event.bot_id !== botUserId
-    ) {
-      waitUntil(handleNewAssistantMessage(event, botUserId))
+    // Handle all message events in IM channels
+    if (event.type === 'message' && 'channel_type' in event && event.channel_type === 'im') {
+      // Check if it's not from a bot
+      const isFromBot =
+        ('bot_id' in event && event.bot_id) ||
+        'bot_profile' in event ||
+        ('bot_id' in event && event.bot_id === botUserId)
+
+      // Process if it's not from a bot and has a thread_ts (or is starting a thread)
+      if (!isFromBot && 'thread_ts' in event) {
+        // Handle both regular messages and file_share messages
+        if (!event.subtype || event.subtype === 'file_share') {
+          waitUntil(handleNewAssistantMessage(event, botUserId))
+        }
+      }
     }
 
     return new Response('Success!', { status: 200 })

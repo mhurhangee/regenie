@@ -1,4 +1,8 @@
-import type { AssistantThreadStartedEvent, GenericMessageEvent } from '@slack/web-api'
+import type {
+  AssistantThreadStartedEvent,
+  FileShareMessageEvent,
+  GenericMessageEvent,
+} from '@slack/web-api'
 import { DEFAULT_AI_SETTINGS } from './constants'
 import { generateResponse } from './generate-response'
 import {
@@ -31,8 +35,18 @@ export async function assistantThreadMessage(event: AssistantThreadStartedEvent)
   await setSuggestedPrompts(randomInitialFollowUps, randomInitialFollowUpsTitle)
 }
 
-export async function handleNewAssistantMessage(event: GenericMessageEvent, botUserId: string) {
-  if (event.bot_id || event.bot_id === botUserId || event.bot_profile || !event.thread_ts) {
+export async function handleNewAssistantMessage(
+  event: GenericMessageEvent | FileShareMessageEvent,
+  botUserId: string
+) {
+  // Type-safe check for bot messages
+  const isFromBot =
+    ('bot_id' in event && event.bot_id) ||
+    ('bot_id' in event && event.bot_id === botUserId) ||
+    'bot_profile' in event
+
+  // Ensure we have a thread_ts
+  if (isFromBot || !event.thread_ts) {
     return
   }
 
@@ -46,7 +60,8 @@ export async function handleNewAssistantMessage(event: GenericMessageEvent, botU
 
   const messages = await getThread(channel, thread_ts, botUserId)
 
-  const result = await generateResponse(messages, updateStatus)
+  // Pass channel ID for channel-specific prompts while keeping the full schema for direct messages
+  const result = await generateResponse(messages, updateStatus, channel, 'full')
 
   await client.chat.postMessage({
     channel: channel,
