@@ -1,5 +1,3 @@
-import { type OpenAIResponsesProviderOptions, openai } from '@ai-sdk/openai'
-import { Output } from 'ai'
 import { z } from 'zod'
 
 export const DEFAULT_AI_SETTINGS = {
@@ -73,8 +71,7 @@ export const DEFAULT_AI_SETTINGS = {
     '☀️ Soaking up some solar-powered insights...',
     '🌳 Rooting around for the best info...',
   ],
-  model: openai.responses('gpt-4.1-mini'),
-  maxSteps: 10,
+  model: 'gpt-4o-mini',
   maxTokens: 5000,
   temperature: 0.7,
   systemPrompt: `You are Regenie, a helpful and enthusiastic Slack bot assistant.  
@@ -96,33 +93,25 @@ export const DEFAULT_AI_SETTINGS = {
       "followUps": "Optional array of follow up prompts from the user's perspective to continue the conversation"
     }
     `,
-  output: Output.object({
-    schema: z.object({
-      threadTitle: z.string().describe('A short title for the entire thread include emojis.'),
-      response: z
-        .string()
-        .describe(
-          "Your response to the user's message. This is the most important part of the response. Format the response with markdown and a lot of emojis."
-        ),
-      followUps: z
-        .array(
-          z
-            .string()
-            .describe(
-              "A follow up prompt from the user's perspective to continue the conversation. Include a relevant emoji at the start of the prompt."
-            )
-        )
-        .describe(
-          "Optional list of follow up prompts from the user's perspective to continue the conversation"
-        ),
-    }),
+  responseSchema: z.object({
+    threadTitle: z.string().describe('A short title for the entire thread include emojis.'),
+    response: z
+      .string()
+      .describe(
+        "Your response to the user's message. This is the most important part of the response. Format the response with markdown and a lot of emojis."
+      ),
+    followUps: z
+      .array(
+        z
+          .string()
+          .describe(
+            "A follow up prompt from the user's perspective to continue the conversation. Include a relevant emoji at the start of the prompt."
+          )
+      )
+      .describe(
+        "Optional list of follow up prompts from the user's perspective to continue the conversation"
+      ),
   }),
-  providerOptions: {
-    openai: {
-      store: false,
-      strictSchemas: true,
-    } satisfies OpenAIResponsesProviderOptions,
-  },
 }
 
 export const ERRORS = {

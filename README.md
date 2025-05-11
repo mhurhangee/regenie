@@ -17,6 +17,7 @@
 - ✅ Improve prompt for follow ups and gen structured data
 - ✅ Home page
 - ✅ Test mentions (add channel history scope)
+- ⬜ Migrate to openai package directly
 - ⬜ PDF and image upload support
 - ⬜ Consider whether to trim first two messages (in assistant threads) as they are always the same
 - ⬜ Make structured data optional (i.e. allow for just text responses for app mentions etc)
