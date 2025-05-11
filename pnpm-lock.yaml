@@ -23,9 +23,6 @@ importers:
       exa-js:
         specifier: ^1.7.0
         version: 1.7.0
-      slack-block-builder:
-        specifier: ^2.8.0
-        version: 2.8.0
       slackify-markdown:
         specifier: ^4.4.0
         version: 4.4.0
@@ -601,9 +598,6 @@ packages:
   signal-exit@4.1.0:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
-
-  slack-block-builder@2.8.0:
-    resolution: {integrity: sha512-iisM+j99iKRuQFVfdWo0FiszDAl3r8Snq704oZH6C0RbDqvoVQStiptt6Y7kc6RX/5hSAqTqjhgvZ/di8cvaIA==}
 
   slackify-markdown@4.4.0:
     resolution: {integrity: sha512-a2b0Rh4aPi3PYt23N0vxPn7emkQtShewhLX8uIiXOMlPBAXRki+/9kEXJztZr1Oo9rDb1YxScGuZ0D2ubLPhvQ==}
@@ -1267,8 +1261,6 @@ snapshots:
   secure-json-parse@2.7.0: {}
 
   signal-exit@4.1.0: {}
-
-  slack-block-builder@2.8.0: {}
 
   slackify-markdown@4.4.0:
     dependencies:
