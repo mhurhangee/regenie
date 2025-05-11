@@ -1,7 +1,7 @@
 import crypto from 'node:crypto'
 import { WebClient } from '@slack/web-api'
-import type { CoreMessage } from 'ai'
 import { DEFAULT_AI_SETTINGS } from './constants'
+import type { Message } from './generate-response'
 
 const signingSecret = process.env.SLACK_SIGNING_SECRET || ''
 
@@ -96,7 +96,7 @@ export async function getThread(
   channel_id: string,
   thread_ts: string,
   botUserId: string
-): Promise<CoreMessage[]> {
+): Promise<Message[]> {
   const { messages } = await client.conversations.replies({
     channel: channel_id,
     ts: thread_ts,
@@ -122,9 +122,9 @@ export async function getThread(
       return {
         role: isBot ? 'assistant' : 'user',
         content: content,
-      } as CoreMessage
+      } as Message
     })
-    .filter((msg): msg is CoreMessage => msg !== null)
+    .filter((msg): msg is Message => msg !== null)
 
   return result
 }
