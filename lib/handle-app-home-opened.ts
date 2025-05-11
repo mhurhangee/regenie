@@ -49,13 +49,23 @@ export const handleAppHomeOpened = async (event: AppHomeOpenedEvent) => {
               type: 'mrkdwn',
               text: '💬 *Direct Message:* Start a private conversation with Regenie',
             },
+          ],
+        },
+        {
+          type: 'context',
+          elements: [
             {
               type: 'mrkdwn',
-              text: '\n🔄 *Channel Mention:* Use `@Regenie` in any channel to get help',
+              text: '🔄 *Channel Mention:* Use `@Regenie` in any channel to get help',
             },
+          ],
+        },
+        {
+          type: 'context',
+          elements: [
             {
               type: 'mrkdwn',
-              text: '\n↗️ *Side Panel:* Add to the top bar for easy access, click the ⫶ and add to top bar ',
+              text: '↗️ *Side Panel:* Add to the top bar for easy access, click the ⫶ and add to top bar ',
             },
           ],
         },
@@ -80,18 +90,38 @@ export const handleAppHomeOpened = async (event: AppHomeOpenedEvent) => {
               type: 'mrkdwn',
               text: '🧠 *AI-Powered Assistance:* Get intelligent responses to your questions',
             },
+          ],
+        },
+        {
+          type: 'context',
+          elements: [
             {
               type: 'mrkdwn',
-              text: '\n🌐 *Powerful Web Search:* For up to date sources',
+              text: '🌐 *Powerful Web Search:* For the latest news and info',
             },
+          ],
+        },
+        {
+          type: 'context',
+          elements: [
             {
               type: 'mrkdwn',
-              text: '\n⚡ *Fast Responses:* Optimized for quick, helpful answers',
+              text: '⚡ *Fast Responses:* Optimized for quick, helpful answers',
             },
+          ],
+        },
+        {
+          type: 'context',
+          elements: [
             {
               type: 'mrkdwn',
               text: '🔍 *Context Awareness:* Remembers conversation history',
             },
+          ],
+        },
+        {
+          type: 'context',
+          elements: [
             {
               type: 'mrkdwn',
               text: '✍️ *Content Generation:* Draft messages, summaries, and more',
@@ -119,10 +149,20 @@ export const handleAppHomeOpened = async (event: AppHomeOpenedEvent) => {
               type: 'mrkdwn',
               text: '💡 *Be Specific:* The more details you provide, the better the response',
             },
+          ],
+        },
+        {
+          type: 'context',
+          elements: [
             {
               type: 'mrkdwn',
               text: '🔄 *Follow-ups:* Ask follow-up questions to refine responses',
             },
+          ],
+        },
+        {
+          type: 'context',
+          elements: [
             {
               type: 'mrkdwn',
               text: '📋 *Lists:* Ask for information in list format for better readability',
