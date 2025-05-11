@@ -19,14 +19,16 @@
 - ✅ Test mentions (add channel history scope)
 - ✅ Migrate to openai package directly
 - ✅ PDF and image upload support for assistant messages and threads.
+- ✅ Add prompt builder for custom channel personalities
+- ✅ Investigate whether direct use of OpenAI API is possible and better for structured data
+- ⬜ Fun facts/news
+- ⬜ Include context element in each message with the personality of Regenie
 - ⬜ Consider whether to trim first two messages (in assistant threads) as they are always the same
 - ⬜ Make structured data optional (i.e. allow for just text responses for app mentions etc)
 - ⬜ Add persona switching
 - ⬜ Better error handling for generateResponse
 - ⬜ Include a backup for structured data
-- ⬜ Investigate whether direct use of OpenAI API is possible and better for structured data
 - ⬜ News specific tool (Tavily?)
 - ⬜ YouTube search tool (YouTube Data API?)
-- ⬜ Consider token limits
-- ⬜ Improve home page
+- ⬜ Add token limits under the guise of staying green
 - ⬜ Voice support

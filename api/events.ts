@@ -1,4 +1,4 @@
-import type { FileShareMessageEvent, GenericMessageEvent, SlackEvent } from '@slack/web-api'
+import type { SlackEvent } from '@slack/web-api'
 import { waitUntil } from '@vercel/functions'
 import { handleAppHomeOpened } from '../lib/handle-app-home-opened'
 import { handleNewAppMention } from '../lib/handle-app-mention'

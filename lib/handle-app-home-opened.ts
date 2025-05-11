@@ -15,7 +15,7 @@ export const handleAppHomeOpened = async (event: AppHomeOpenedEvent) => {
           type: 'header',
           text: {
             type: 'plain_text',
-            text: 'Welcome to Regenie! 🚀',
+            text: '🐮 Welcome to Regenie! 🌿',
             emoji: true,
           },
         },
@@ -28,7 +28,6 @@ export const handleAppHomeOpened = async (event: AppHomeOpenedEvent) => {
             text: 'Regenie is your eco-focused AI-powered assistant for Slack. Get instant help, generate content, answer questions, and boost your productivity without leaving your workspace.',
           },
         },
-
         {
           type: 'divider',
         },
@@ -38,7 +37,7 @@ export const handleAppHomeOpened = async (event: AppHomeOpenedEvent) => {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: '*Quick Start*',
+            text: '🐇 *Quick Start*',
           },
         },
 
@@ -69,7 +68,15 @@ export const handleAppHomeOpened = async (event: AppHomeOpenedEvent) => {
             },
           ],
         },
-
+        {
+          type: 'context',
+          elements: [
+            {
+              type: 'mrkdwn',
+              text: '🔬 *Nature ID:* Upload an image to `#regenie-id` for AI-identification',
+            },
+          ],
+        },
         {
           type: 'divider',
         },
@@ -79,7 +86,7 @@ export const handleAppHomeOpened = async (event: AppHomeOpenedEvent) => {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: '*Features*',
+            text: '🏔️ *Features*',
           },
         },
         {
@@ -155,7 +162,7 @@ export const handleAppHomeOpened = async (event: AppHomeOpenedEvent) => {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: '*Tips & Tricks*',
+            text: '🍀 *Tips & Tricks*',
           },
         },
 
