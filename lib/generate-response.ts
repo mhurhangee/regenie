@@ -1,88 +1,32 @@
-import { openai } from '@ai-sdk/openai'
-import { type CoreMessage, generateText, tool } from 'ai'
-import { z } from 'zod'
-import { logger } from './logger'
-import { exa } from './utils'
+import { type CoreMessage, generateText } from 'ai'
 import slackifyMarkdown from 'slackify-markdown'
+import { DEFAULT_AI_SETTINGS } from './constants'
+import { getWeather, searchWeb } from './tools'
 
 export const generateResponse = async (
   messages: CoreMessage[],
   updateStatus?: (status: string) => void
 ) => {
-  logger.debug('generateResponse: Generating response', messages)
-  const { text } = await generateText({
-    model: openai('gpt-4.1-mini'),
-    system: `- You are a helpful Slack bot assistant called Regenie.
-    - You have expert knowledge about environmental science, ecology, renewable energy, rewilding, sustainability and regenerative agriculture.
-    - You are extremely passionate about the environment and engaging with others about your expertise.
-    - You are from the UK. 
-    - Keep your responses concise and to the point.
-    - Do not tag users.
-    - Use markdown and emojis to make your responses more engaging.
-    - Current date is: ${new Date().toISOString().split('T')[0]}
-    - Make sure to ALWAYS include sources in your final response if you use web search. Put sources inline if possible.`,
+  const { experimental_output } = await generateText({
+    model: DEFAULT_AI_SETTINGS.model,
+    system: `${DEFAULT_AI_SETTINGS.systemPrompt}\n\n${DEFAULT_AI_SETTINGS.structuredAdditionPrompt}`,
+    maxSteps: DEFAULT_AI_SETTINGS.maxSteps,
+    maxTokens: DEFAULT_AI_SETTINGS.maxTokens,
+    temperature: DEFAULT_AI_SETTINGS.temperature,
     messages,
-    maxSteps: 10,
+    experimental_output: DEFAULT_AI_SETTINGS.output,
     tools: {
-      getWeather: tool({
-        description: 'Get the current weather at a location',
-        parameters: z.object({
-          latitude: z.number(),
-          longitude: z.number(),
-          city: z.string(),
-        }),
-        execute: async ({ latitude, longitude, city }) => {
-          logger.debug('generateResponse: Getting weather', { latitude, longitude, city })
-          updateStatus?.(`is getting weather for ${city}...`)
-
-          const response = await fetch(
-            `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weathercode,relativehumidity_2m&timezone=auto`
-          )
-
-          const weatherData = await response.json()
-          return {
-            temperature: weatherData.current.temperature_2m,
-            weatherCode: weatherData.current.weathercode,
-            humidity: weatherData.current.relativehumidity_2m,
-            city,
-          }
-        },
-      }),
-      searchWeb: tool({
-        description: 'Use this to search the web for information',
-        parameters: z.object({
-          query: z.string(),
-          specificDomain: z
-            .string()
-            .nullable()
-            .describe(
-              'a domain to search if the user specifies e.g. bbc.com. Should be only the domain name without the protocol'
-            ),
-        }),
-        execute: async ({ query, specificDomain }) => {
-          logger.debug('generateResponse: Searching the web', { query, specificDomain })
-          updateStatus?.(`is searching the web for ${query}...`)
-          const { results } = await exa.searchAndContents(query, {
-            livecrawl: 'always',
-            numResults: 3,
-            includeDomains: specificDomain ? [specificDomain] : undefined,
-          })
-
-          return {
-            results: results.map((result) => ({
-              title: result.title,
-              url: result.url,
-              snippet: result.text.slice(0, 1000),
-            })),
-          }
-        },
-      }),
+      getWeather: getWeather(updateStatus),
+      searchWeb: searchWeb(updateStatus),
     },
   })
 
-  logger.debug('generateResponse: Generated response', text)
   // Convert markdown to Slack mrkdwn format
-  const mrkdwnText = slackifyMarkdown(text)
-  logger.debug('generateResponse: MRKDWN Text', mrkdwnText)
-  return mrkdwnText
+  const mrkdwnText = slackifyMarkdown(experimental_output.response)
+
+  return {
+    threadTitle: experimental_output.threadTitle || '',
+    response: mrkdwnText,
+    followUps: experimental_output.followUps || [],
+  }
 }
