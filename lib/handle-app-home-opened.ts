@@ -51,11 +51,11 @@ export const handleAppHomeOpened = async (event: AppHomeOpenedEvent) => {
             },
             {
               type: 'mrkdwn',
-              text: '🔄 *Channel Mention:* Use `@Regenie` in any channel to get help',
+              text: '\n🔄 *Channel Mention:* Use `@Regenie` in any channel to get help',
             },
             {
               type: 'mrkdwn',
-              text: '↗️ *Side Panel:* Add to the top bar for easy access, click the ⫶ and add to top bar ',
+              text: '\n↗️ *Side Panel:* Add to the top bar for easy access, click the ⫶ and add to top bar ',
             },
           ],
         },
@@ -82,11 +82,11 @@ export const handleAppHomeOpened = async (event: AppHomeOpenedEvent) => {
             },
             {
               type: 'mrkdwn',
-              text: '🌐 *Powerful Web Search:* For up to date sources',
+              text: '\n🌐 *Powerful Web Search:* For up to date sources',
             },
             {
               type: 'mrkdwn',
-              text: '⚡ *Fast Responses:* Optimized for quick, helpful answers',
+              text: '\n⚡ *Fast Responses:* Optimized for quick, helpful answers',
             },
             {
               type: 'mrkdwn',
