@@ -8,21 +8,27 @@ import {
   updateStatusUtil,
   updateTitleUtil,
 } from './slack-utils'
+import { getRandomSubList } from './utils'
 
 export async function assistantThreadMessage(event: AssistantThreadStartedEvent) {
   const { channel_id, thread_ts } = event.assistant_thread
 
+  const randomWelcomeMessage = getRandomSubList(DEFAULT_AI_SETTINGS.welcomeMessage, 1)[0]
+
   await client.chat.postMessage({
     channel: channel_id,
     thread_ts: thread_ts,
-    text: DEFAULT_AI_SETTINGS.welcomeMessage,
+    text: randomWelcomeMessage,
   })
 
+  const randomInitialFollowUps = getRandomSubList(DEFAULT_AI_SETTINGS.initialFollowups, 3)
+  const randomInitialFollowUpsTitle = getRandomSubList(
+    DEFAULT_AI_SETTINGS.initialFollowupsTitle,
+    1
+  )[0]
+
   const setSuggestedPrompts = setSuggestedPromptsUtil(channel_id, thread_ts)
-  await setSuggestedPrompts(
-    DEFAULT_AI_SETTINGS.initialFollowups,
-    DEFAULT_AI_SETTINGS.initialFollowupsTitle
-  )
+  await setSuggestedPrompts(randomInitialFollowUps, randomInitialFollowUpsTitle)
 }
 
 export async function handleNewAssistantMessage(event: GenericMessageEvent, botUserId: string) {
@@ -58,8 +64,10 @@ export async function handleNewAssistantMessage(event: GenericMessageEvent, botU
   const updateTitle = updateTitleUtil(channel, thread_ts)
   await updateTitle(result.threadTitle)
 
+  const randomFollowUpTitle = getRandomSubList(DEFAULT_AI_SETTINGS.followUpTitle, 1)[0]
+
   const setSuggestedPrompts = setSuggestedPromptsUtil(channel, thread_ts)
-  await setSuggestedPrompts(result.followUps || [])
+  await setSuggestedPrompts(result.followUps || [], randomFollowUpTitle)
 
   await updateStatus('')
 }

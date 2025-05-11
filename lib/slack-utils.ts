@@ -71,7 +71,7 @@ export const updateTitleUtil = (channel: string, thread_ts: string) => {
 }
 
 export const setSuggestedPromptsUtil = (channel: string, thread_ts: string) => {
-  return async (promptTexts: string[], title = DEFAULT_AI_SETTINGS.followUpTitle) => {
+  return async (promptTexts: string[], title: string = DEFAULT_AI_SETTINGS.followUpTitle[0]) => {
     if (promptTexts.length === 0) {
       return
     }
