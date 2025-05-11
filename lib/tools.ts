@@ -1,6 +1,16 @@
+import { openai } from '@ai-sdk/openai'
 import { tool } from 'ai'
 import { z } from 'zod'
 import { exa } from './utils'
+
+export const openaiWebSearchTool = openai.tools.webSearchPreview({
+  searchContextSize: 'medium',
+  userLocation: {
+    type: 'approximate',
+    country: 'GB',
+    region: 'Hampshire',
+  },
+})
 
 export function getWeather(updateStatus?: (status: string) => void) {
   return tool({

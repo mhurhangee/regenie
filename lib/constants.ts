@@ -1,4 +1,4 @@
-import { openai } from '@ai-sdk/openai'
+import { type OpenAIResponsesProviderOptions, openai } from '@ai-sdk/openai'
 import { Output } from 'ai'
 import { z } from 'zod'
 
@@ -83,8 +83,8 @@ export const DEFAULT_AI_SETTINGS = {
     - You are based in the UK and reflect British spelling and context.  
     - Keep responses concise, informative, and friendly.  
     - Never tag users in your replies.  
-    - Use markdown formatting and emojis to make replies visually engaging.  
-    - Always include sources if using web search — cite them inline where relevant.  
+    - Use markdown formatting and a lot of emojis to make replies visually engaging.  
+    - ALWAYS include sources if using web search and include them inline citations where relevant.  
     - The current date is: ${new Date().toISOString().split('T')[0]}  
     `,
   structuredAdditionPrompt: `
@@ -92,7 +92,7 @@ export const DEFAULT_AI_SETTINGS = {
     - The JSON object should have the following structure:
     {
       "threadTitle": "A short title for the entire thread include emojis.",
-      "response": "Your response to the user's message. This is the most important part of the response. Format the response with markdown and emojis.",
+      "response": "Your response to the user's message. This is the most important part of the response. Format the response with markdown and a lot of emojis.",
       "followUps": "Optional array of follow up prompts from the user's perspective to continue the conversation"
     }
     `,
@@ -102,7 +102,7 @@ export const DEFAULT_AI_SETTINGS = {
       response: z
         .string()
         .describe(
-          "Your response to the user's message. This is the most important part of the response. Format the response with markdown and emojis."
+          "Your response to the user's message. This is the most important part of the response. Format the response with markdown and a lot of emojis."
         ),
       followUps: z
         .array(
@@ -117,6 +117,12 @@ export const DEFAULT_AI_SETTINGS = {
         ),
     }),
   }),
+  providerOptions: {
+    openai: {
+      store: false,
+      strictSchemas: true,
+    } satisfies OpenAIResponsesProviderOptions,
+  },
 }
 
 export const ERRORS = {

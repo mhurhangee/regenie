@@ -1,7 +1,7 @@
 import { type CoreMessage, generateText } from 'ai'
 import slackifyMarkdown from 'slackify-markdown'
 import { DEFAULT_AI_SETTINGS } from './constants'
-import { getWeather, searchWeb } from './tools'
+import { getWeather, openaiWebSearchTool } from './tools'
 
 export const generateResponse = async (
   messages: CoreMessage[],
@@ -17,8 +17,10 @@ export const generateResponse = async (
     experimental_output: DEFAULT_AI_SETTINGS.output,
     tools: {
       getWeather: getWeather(updateStatus),
-      searchWeb: searchWeb(updateStatus),
+      //searchWeb: searchWeb(updateStatus),
+      openaiWebSearchTool,
     },
+    providerOptions: DEFAULT_AI_SETTINGS.providerOptions,
   })
 
   // Convert markdown to Slack mrkdwn format
