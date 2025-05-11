@@ -9,7 +9,7 @@ export const generateResponse = async (
 ) => {
   const { experimental_output } = await generateText({
     model: DEFAULT_AI_SETTINGS.model,
-    system: DEFAULT_AI_SETTINGS.systemPrompt,
+    system: `${DEFAULT_AI_SETTINGS.systemPrompt}\n\n${DEFAULT_AI_SETTINGS.structuredAdditionPrompt}`,
     maxSteps: DEFAULT_AI_SETTINGS.maxSteps,
     maxTokens: DEFAULT_AI_SETTINGS.maxTokens,
     temperature: DEFAULT_AI_SETTINGS.temperature,

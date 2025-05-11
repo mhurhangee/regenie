@@ -16,26 +16,23 @@ export const DEFAULT_AI_SETTINGS = {
     'Hey! Regenie in the chat 💬 Ready to talk green energy, ecology, and sustainable solutions 🌞',
   ],
   initialFollowups: [
-    'What are the most impactful daily habits for living sustainably?',
-    'How can I reduce my carbon footprint in the UK?',
-    'What’s the difference between rewilding and afforestation?',
-    'Can you explain regenerative agriculture in simple terms?',
-    'What are the latest breakthroughs in renewable energy?',
-    'How does climate change affect UK biodiversity?',
-    'What sustainable packaging alternatives exist for small businesses?',
-    'What’s a good way to start composting at home?',
-    'Are electric vehicles truly better for the environment?',
-    'Can you recommend UK-based environmental charities or projects to support?',
-    'How can urban areas support biodiversity?',
-    'What is circular economy and why is it important?',
-    'How do wind and solar power compare in efficiency?',
-    'What are some eco-friendly gardening tips?',
-    'How can I make my home more energy-efficient?',
-    'What is carbon offsetting and does it really work?',
-    'How does fast fashion harm the environment?',
-    'What are green roofs and how do they help cities?',
-    'Is plant-based eating better for the planet?',
-    'How can communities get involved in rewilding projects?',
+    '🌾 Can you explain regenerative agriculture in simple terms?',
+    '⚡ What are the latest breakthroughs in renewable energy?',
+    '🦋 How does climate change affect UK biodiversity?',
+    '📦 What sustainable packaging alternatives exist for small businesses?',
+    '♻️ What’s a good way to start composting at home?',
+    '🚗 Are electric vehicles truly better for the environment?',
+    '🇬🇧 Can you recommend UK-based environmental charities or projects to support?',
+    '🏙️ How can urban areas support biodiversity?',
+    '🔄 What is circular economy and why is it important?',
+    '🌞 How do wind and solar power compare in efficiency?',
+    '🌼 What are some eco-friendly gardening tips?',
+    '🏡 How can I make my home more energy-efficient?',
+    '🌍 What is carbon offsetting and does it really work?',
+    '👗 How does fast fashion harm the environment?',
+    '🌿 What are green roofs and how do they help cities?',
+    '🥦 Is plant-based eating better for the planet?',
+    '🌳 How can communities get involved in rewilding projects?',
   ],
   initialFollowupsTitle: [
     '🌿 Try asking me this!',
@@ -61,7 +58,21 @@ export const DEFAULT_AI_SETTINGS = {
     '📖 Keep learning with these!',
     '🔁 Curious about more?',
   ],
-  thinkingMessage: 'is thinking...',
+  thinkingMessage: [
+    '🌱 Regrowing some thoughts...',
+    '🧠 Composting ideas into answers...',
+    '🌍 Gathering eco-friendly insights...',
+    '🔋 Charging up a green response...',
+    '🍃 Let me photosynthesise that...',
+    '🐝 Pollinating some ideas...',
+    '🧑‍🔬 Brewing up a sustainable solution...',
+    '📚 Reading the leaves on this one...',
+    '💭 Thinking green thoughts...',
+    '🌾 Cultivating an answer just for you...',
+    '💨 Blowing in the right facts...',
+    '☀️ Soaking up some solar-powered insights...',
+    '🌳 Rooting around for the best info...',
+  ],
   model: openai.responses('gpt-4.1-mini'),
   maxSteps: 10,
   maxTokens: 5000,
@@ -76,13 +87,34 @@ export const DEFAULT_AI_SETTINGS = {
     - Always include sources if using web search — cite them inline where relevant.  
     - The current date is: ${new Date().toISOString().split('T')[0]}  
     `,
+  structuredAdditionPrompt: `
+    - Your response should be formated as a valid JSON object and not surrounded by backticks.
+    - The JSON object should have the following structure:
+    {
+      "threadTitle": "A short title for the entire thread include emojis.",
+      "response": "Your response to the user's message. This is the most important part of the response. Format the response with markdown and emojis.",
+      "followUps": "Optional array of follow up prompts from the user's perspective to continue the conversation"
+    }
+    `,
   output: Output.object({
     schema: z.object({
-      threadTitle: z.string().describe('The title of the thread'),
-      response: z.string().describe('The response to the user'),
+      threadTitle: z.string().describe('A short title for the entire thread include emojis.'),
+      response: z
+        .string()
+        .describe(
+          "Your response to the user's message. This is the most important part of the response. Format the response with markdown and emojis."
+        ),
       followUps: z
-        .array(z.string().describe('A follow up prompts for the user to continue the conversation'))
-        .describe('Optional follow up prompts for the user to continue the conversation'),
+        .array(
+          z
+            .string()
+            .describe(
+              "A follow up prompt from the user's perspective to continue the conversation. Include a relevant emoji at the start of the prompt."
+            )
+        )
+        .describe(
+          "Optional list of follow up prompts from the user's perspective to continue the conversation"
+        ),
     }),
   }),
 }

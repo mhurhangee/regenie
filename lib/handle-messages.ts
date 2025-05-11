@@ -39,7 +39,10 @@ export async function handleNewAssistantMessage(event: GenericMessageEvent, botU
   const { thread_ts, channel } = event
 
   const updateStatus = updateStatusUtil(channel, thread_ts)
-  await updateStatus(DEFAULT_AI_SETTINGS.thinkingMessage)
+
+  const randomThinkingMessage = getRandomSubList(DEFAULT_AI_SETTINGS.thinkingMessage, 1)[0]
+
+  await updateStatus(randomThinkingMessage)
 
   const messages = await getThread(channel, thread_ts, botUserId)
 

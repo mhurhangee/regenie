@@ -2,6 +2,7 @@ import type { AppMentionEvent } from '@slack/web-api'
 import { DEFAULT_AI_SETTINGS, ERRORS } from './constants'
 import { generateResponse } from './generate-response'
 import { client, getThread } from './slack-utils'
+import { getRandomSubList } from './utils'
 
 const updateStatusUtil = async (initialStatus: string, event: AppMentionEvent) => {
   const initialMessage = await client.chat.postMessage({
@@ -32,7 +33,8 @@ export async function handleNewAppMention(event: AppMentionEvent, botUserId: str
 
   const { thread_ts, channel } = event
 
-  const updateMessage = await updateStatusUtil(DEFAULT_AI_SETTINGS.thinkingMessage, event)
+  const randomThinkingMessage = getRandomSubList(DEFAULT_AI_SETTINGS.thinkingMessage, 1)[0]
+  const updateMessage = await updateStatusUtil(randomThinkingMessage, event)
 
   if (thread_ts) {
     const messages = await getThread(channel, thread_ts, botUserId)
