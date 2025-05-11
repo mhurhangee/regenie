@@ -60,7 +60,8 @@ export async function handleNewAssistantMessage(
 
   const messages = await getThread(channel, thread_ts, botUserId)
 
-  const result = await generateResponse(messages, updateStatus)
+  // Pass channel ID for channel-specific prompts while keeping the full schema for direct messages
+  const result = await generateResponse(messages, updateStatus, channel, 'full')
 
   await client.chat.postMessage({
     channel: channel,

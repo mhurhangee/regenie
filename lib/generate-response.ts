@@ -2,6 +2,7 @@ import OpenAI from 'openai'
 import { zodTextFormat } from 'openai/helpers/zod'
 import slackifyMarkdown from 'slackify-markdown'
 import { DEFAULT_AI_SETTINGS } from './constants'
+import { type SchemaType, buildPromptConfig } from './prompt-builder'
 import type { Message } from './types'
 
 // Initialize the OpenAI client
@@ -13,19 +14,26 @@ const openai = new OpenAI({
  * Generates a response using OpenAI API with error handling and retry mechanism
  * @param messages Array of messages in the conversation
  * @param updateStatus Optional callback to update status during processing
- * @returns The generated response with threadTitle, response text, and followUps
+ * @param channelId Optional channel ID to customize the system prompt
+ * @param schemaType Type of response schema to use (full or simple)
+ * @returns The generated response with threadTitle, response text, and followUps (if using full schema)
  */
 export const generateResponse = async (
   messages: Message[],
-  updateStatus?: (status: string) => void
+  updateStatus?: (status: string) => void,
+  channelId?: string,
+  schemaType: SchemaType = 'full'
 ) => {
   const MAX_RETRIES = 3
   const RETRY_DELAY = 1000 // 1 second delay between retries
 
+  // Get the appropriate prompt configuration based on channel and schema type
+  const promptConfig = buildPromptConfig(channelId, schemaType)
+
   // Prepare system message
   const systemMessage = {
     role: 'system' as const,
-    content: `${DEFAULT_AI_SETTINGS.systemPrompt}\n\n${DEFAULT_AI_SETTINGS.structuredAdditionPrompt}`,
+    content: `${promptConfig.systemPrompt}\n\n${promptConfig.structuredAdditionPrompt}`,
   } as Message
 
   // Prepare the input messages with system message first
@@ -49,7 +57,7 @@ export const generateResponse = async (
         temperature: DEFAULT_AI_SETTINGS.temperature,
         max_output_tokens: DEFAULT_AI_SETTINGS.maxTokens,
         text: {
-          format: zodTextFormat(DEFAULT_AI_SETTINGS.responseSchema, 'response'),
+          format: zodTextFormat(promptConfig.responseSchema, 'response'),
         },
       })
 
@@ -63,10 +71,24 @@ export const generateResponse = async (
       // Convert markdown to Slack mrkdwn format
       const mrkdwnText = slackifyMarkdown(output.response)
 
+      // Return appropriate response format based on schema type
+      if (schemaType === 'simple') {
+        return {
+          response: mrkdwnText,
+          // Include empty values for backward compatibility
+          threadTitle: '',
+          followUps: [],
+        }
+      }
+
+      // For full schema, we know the output has threadTitle and followUps properties
+      // Type assertion to help TypeScript understand the structure
+      const fullOutput = output as { threadTitle: string; response: string; followUps: string[] }
+
       return {
-        threadTitle: output.threadTitle || '',
+        threadTitle: fullOutput.threadTitle || '',
         response: mrkdwnText,
-        followUps: output.followUps || [],
+        followUps: fullOutput.followUps || [],
       }
     } catch (error) {
       lastError = error as Error
