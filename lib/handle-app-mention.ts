@@ -1,10 +1,13 @@
-import type { AppMentionEvent } from '@slack/web-api'
+import type { AppMentionEvent, FileShareMessageEvent } from '@slack/web-api'
 import { DEFAULT_AI_SETTINGS, ERRORS } from './constants'
 import { generateResponse } from './generate-response'
 import { client, getThread } from './slack-utils'
 import { getRandomSubList } from './utils'
 
-const updateStatusUtil = async (initialStatus: string, event: AppMentionEvent) => {
+const updateStatusUtil = async (
+  initialStatus: string,
+  event: AppMentionEvent | FileShareMessageEvent
+) => {
   const initialMessage = await client.chat.postMessage({
     channel: event.channel,
     thread_ts: event.thread_ts ?? event.ts,
@@ -26,22 +29,39 @@ const updateStatusUtil = async (initialStatus: string, event: AppMentionEvent) =
   return updateMessage
 }
 
-export async function handleNewAppMention(event: AppMentionEvent, botUserId: string) {
-  if (event.bot_id || event.bot_id === botUserId || event.bot_profile) {
+export async function handleNewAppMention(
+  event: AppMentionEvent | FileShareMessageEvent,
+  botUserId: string
+) {
+  // Type-safe check for bot messages
+  const isFromBot =
+    ('bot_id' in event && event.bot_id) ||
+    ('bot_id' in event && event.bot_id === botUserId) ||
+    'bot_profile' in event
+
+  if (isFromBot) {
     return
   }
 
-  const { thread_ts, channel } = event
+  // Extract common properties using type-safe access
+  const thread_ts = event.thread_ts || event.ts
+  const channel = event.channel
 
   const randomThinkingMessage = getRandomSubList(DEFAULT_AI_SETTINGS.thinkingMessage, 1)[0]
   const updateMessage = await updateStatusUtil(randomThinkingMessage, event)
 
+  // Handle the message based on whether it's in a thread or not
   if (thread_ts) {
     const messages = await getThread(channel, thread_ts, botUserId)
     const result = await generateResponse(messages, updateMessage)
     await updateMessage(result.response)
   } else {
-    const result = await generateResponse([{ role: 'user', content: event.text }], updateMessage)
+    // For new messages not in a thread, create a simple message
+    // If it's a file_share message, it will be handled by getThread
+    const result = await generateResponse(
+      [{ role: 'user', content: event.text || '' }],
+      updateMessage
+    )
     await updateMessage(result.response)
   }
 }

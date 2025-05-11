@@ -27,7 +27,15 @@ export async function POST(request: Request) {
 
     const event = payload.event as SlackEvent
 
-    if (event.type === 'app_mention') {
+    // Handle app mentions, including those with file attachments
+    if (
+      event.type === 'app_mention' ||
+      (event.type === 'message' &&
+        event.subtype === 'file_share' &&
+        'text' in event &&
+        event.text &&
+        event.text.includes(`<@${botUserId}>`))
+    ) {
       waitUntil(handleNewAppMention(event, botUserId))
     }
 
