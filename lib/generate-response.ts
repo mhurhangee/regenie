@@ -85,6 +85,12 @@ export const generateResponse = async (
     }
   }
 
-  // If all retries failed, throw the last error or a generic one
-  throw lastError || new Error('Failed to generate response after multiple attempts')
+  console.error('Failed to generate response after multiple attempts:', lastError)
+
+  return {
+    threadTitle: '',
+    response:
+      'Failed to generate response after multiple attempts. Please refresh the thread and try again. Or contact the admin.',
+    followUps: [],
+  }
 }
