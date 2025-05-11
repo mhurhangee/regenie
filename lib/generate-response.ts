@@ -52,7 +52,7 @@ export const generateResponse = async (
         model: DEFAULT_AI_SETTINGS.model,
         input: inputMessages,
         temperature: DEFAULT_AI_SETTINGS.temperature,
-        maxTokens: DEFAULT_AI_SETTINGS.maxTokens,
+        max_output_tokens: DEFAULT_AI_SETTINGS.maxTokens,
         text: {
           format: zodTextFormat(DEFAULT_AI_SETTINGS.responseSchema, 'response'),
         },
