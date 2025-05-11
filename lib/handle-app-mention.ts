@@ -1,4 +1,5 @@
 import type { AppMentionEvent } from '@slack/web-api'
+import { DEFAULT_AI_SETTINGS, ERRORS } from './constants'
 import { generateResponse } from './generate-response'
 import { client, getThread } from './slack-utils'
 
@@ -10,7 +11,7 @@ const updateStatusUtil = async (initialStatus: string, event: AppMentionEvent) =
   })
 
   if (!initialMessage || !initialMessage.ts) {
-    throw new Error('Failed to post initial message')
+    throw new Error(ERRORS.initialMessage)
   }
 
   const updateMessage = async (status: string) => {
@@ -31,7 +32,7 @@ export async function handleNewAppMention(event: AppMentionEvent, botUserId: str
 
   const { thread_ts, channel } = event
 
-  const updateMessage = await updateStatusUtil('is thinking...', event)
+  const updateMessage = await updateStatusUtil(DEFAULT_AI_SETTINGS.thinkingMessage, event)
 
   if (thread_ts) {
     const messages = await getThread(channel, thread_ts, botUserId)

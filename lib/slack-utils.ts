@@ -1,6 +1,7 @@
 import crypto from 'node:crypto'
 import { WebClient } from '@slack/web-api'
 import type { CoreMessage } from 'ai'
+import { DEFAULT_AI_SETTINGS } from './constants'
 
 const signingSecret = process.env.SLACK_SIGNING_SECRET || ''
 
@@ -70,7 +71,7 @@ export const updateTitleUtil = (channel: string, thread_ts: string) => {
 }
 
 export const setSuggestedPromptsUtil = (channel: string, thread_ts: string) => {
-  return async (promptTexts: string[], title = 'Follow ups') => {
+  return async (promptTexts: string[], title = DEFAULT_AI_SETTINGS.followUpTitle) => {
     if (promptTexts.length === 0) {
       return
     }

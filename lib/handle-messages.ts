@@ -1,4 +1,5 @@
 import type { AssistantThreadStartedEvent, GenericMessageEvent } from '@slack/web-api'
+import { DEFAULT_AI_SETTINGS } from './constants'
 import { generateResponse } from './generate-response'
 import {
   client,
@@ -14,16 +15,13 @@ export async function assistantThreadMessage(event: AssistantThreadStartedEvent)
   await client.chat.postMessage({
     channel: channel_id,
     thread_ts: thread_ts,
-    text: "Hello, I'm Regenie! 🌱 Your eco-focused AI assistant ready to help with environmental science, sustainability, and regenerative topics! 🌍",
+    text: DEFAULT_AI_SETTINGS.welcomeMessage,
   })
 
   const setSuggestedPrompts = setSuggestedPromptsUtil(channel_id, thread_ts)
   await setSuggestedPrompts(
-    [
-      'What is the current weather in London?',
-      'What is the latest Premier League news from the BBC?',
-    ],
-    'Initial suggestions'
+    DEFAULT_AI_SETTINGS.initialFollowups,
+    DEFAULT_AI_SETTINGS.initialFollowupsTitle
   )
 }
 
@@ -35,7 +33,7 @@ export async function handleNewAssistantMessage(event: GenericMessageEvent, botU
   const { thread_ts, channel } = event
 
   const updateStatus = updateStatusUtil(channel, thread_ts)
-  await updateStatus('is thinking...')
+  await updateStatus(DEFAULT_AI_SETTINGS.thinkingMessage)
 
   const messages = await getThread(channel, thread_ts, botUserId)
 

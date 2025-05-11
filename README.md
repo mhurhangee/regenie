@@ -12,7 +12,8 @@
 - ✅ AI suggested prompts
 - ✅ AI suggested title
 - ✅ Remove extreme logging to clean up code
-- ⬜ Add a constants file and move all constants there
+- ✅ Add a constants file and move all constants there
+- ⬜ PDF and image upload support
 - ⬜ Consider whether to trim first two messages (in assistant threads) as they are always the same
 - ⬜ Improve prompt for follow ups
 - ⬜ Make structured data optional (i.e. allow for just text responses for app mentions etc)
