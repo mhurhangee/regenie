@@ -1,4 +1,4 @@
-import { openai } from '@ai-sdk/openai'
+import { type OpenAIResponsesProviderOptions, openai } from '@ai-sdk/openai'
 import { Output } from 'ai'
 import { z } from 'zod'
 
@@ -117,6 +117,12 @@ export const DEFAULT_AI_SETTINGS = {
         ),
     }),
   }),
+  providerOptions: {
+    openai: {
+      store: false,
+      strictSchemas: true,
+    } satisfies OpenAIResponsesProviderOptions,
+  },
 }
 
 export const ERRORS = {
