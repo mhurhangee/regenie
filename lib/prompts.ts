@@ -228,7 +228,6 @@ export const PERSONALITIES: Record<string, PersonalityInfo> = {
     name: 'Concise Helper',
     description: 'Brief and to-the-point responses',
   },
-}
 
 /**
  * Map of channel IDs to personality types

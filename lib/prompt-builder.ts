@@ -14,6 +14,7 @@ export type SchemaType = 'full' | 'simple'
 // Define the prompt types based on the keys of the PERSONALITIES object
 export type PromptType = keyof typeof PERSONALITIES
 
+
 // Interface for the prompt and schema configuration
 export interface PromptConfig {
   systemPrompt: string
