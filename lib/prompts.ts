@@ -228,11 +228,13 @@ export const PERSONALITIES: Record<string, PersonalityInfo> = {
     name: 'Concise Helper',
     description: 'Brief and to-the-point responses',
   },
+}
 
 /**
  * Map of channel IDs to personality types
  * This is derived from the PERSONALITIES configuration
  */
+
 export const CHANNEL_PROMPT_MAP: Record<string, string> = Object.entries(PERSONALITIES).reduce(
   (map, [personalityType, config]) => {
     if (config.channels) {
