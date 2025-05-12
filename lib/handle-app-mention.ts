@@ -49,7 +49,7 @@ export async function handleNewAppMention(
     )
 
     // First update the message to clear the thinking status
-    await updateMessage('')
+    await updateMessage('Test')
 
     // Then post a new message with personality context
     // This is the first message in a new thread, so we always show personality context
