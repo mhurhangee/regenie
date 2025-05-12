@@ -3,6 +3,7 @@ import { WebClient } from '@slack/web-api'
 import type { AppMentionEvent, FileShareMessageEvent } from '@slack/web-api'
 import { DEFAULT_AI_SETTINGS } from './constants'
 import { ERRORS } from './constants'
+import { CHANNEL_PROMPT_MAP, PERSONALITIES } from './prompts'
 import type { Message } from './types'
 
 const signingSecret = process.env.SLACK_SIGNING_SECRET || ''
@@ -248,11 +249,77 @@ export async function getFileContent(fileId: string): Promise<Buffer> {
 }
 
 export const getBotId = async () => {
-  const { user_id: botUserId } = await client.auth.test()
+  try {
+    const authTest = await client.auth.test()
+    return authTest.user_id
+  } catch (error) {
+    console.error('Error getting bot ID:', error)
+    return ''
+  }
+}
 
-  if (!botUserId) {
-    throw new Error('botUserId is undefined')
+/**
+ * Utility function for posting messages with personality context
+ * @param channel The channel to post to
+ * @param thread_ts The thread timestamp to reply to
+ * @param text The text of the message
+ * @param showPersonality Whether to show the personality context (defaults to true)
+ * @param isFirstInThread Whether this is the first message in the thread (defaults to false)
+ * @returns The result of the chat.postMessage call
+ */
+export const postMessageWithContext = async (
+  channel: string,
+  thread_ts: string,
+  text: string,
+  showPersonality = true,
+  isFirstInThread = false
+) => {
+  // Only show personality context if requested and it's the first message in a thread
+  // or if it's a direct message (which always uses the full schema)
+  if (!showPersonality || (!isFirstInThread && !channel.startsWith('D'))) {
+    return client.chat.postMessage({
+      channel,
+      thread_ts,
+      text,
+      unfurl_links: false,
+      blocks: [
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text,
+          },
+        },
+      ],
+    })
   }
 
-  return botUserId
+  // Determine which personality is being used based on the channel
+  const promptType = CHANNEL_PROMPT_MAP[channel as keyof typeof CHANNEL_PROMPT_MAP] || 'default'
+  const personalityInfo = PERSONALITIES[promptType] || PERSONALITIES.default
+
+  return client.chat.postMessage({
+    channel,
+    thread_ts,
+    text,
+    unfurl_links: false,
+    blocks: [
+      {
+        type: 'context',
+        elements: [
+          {
+            type: 'mrkdwn',
+            text: `${personalityInfo.emoji} *${personalityInfo.name}*: ${personalityInfo.description}`,
+          },
+        ],
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text,
+        },
+      },
+    ],
+  })
 }

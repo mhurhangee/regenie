@@ -8,6 +8,7 @@ import { generateResponse } from './generate-response'
 import {
   client,
   getThread,
+  postMessageWithContext,
   setSuggestedPromptsUtil,
   updateStatusUtil,
   updateTitleUtil,
@@ -63,21 +64,9 @@ export async function handleNewAssistantMessage(
   // Pass channel ID for channel-specific prompts while keeping the full schema for direct messages
   const result = await generateResponse(messages, updateStatus, channel, 'full')
 
-  await client.chat.postMessage({
-    channel: channel,
-    thread_ts: thread_ts,
-    text: result.response,
-    unfurl_links: false,
-    blocks: [
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: result.response,
-        },
-      },
-    ],
-  })
+  // Use the new utility function to post the message with personality context
+  // This is the first real response in the thread, so we set isFirstInThread to true
+  await postMessageWithContext(channel, thread_ts, result.response, true, true)
 
   const updateTitle = updateTitleUtil(channel, thread_ts)
   await updateTitle(result.threadTitle)

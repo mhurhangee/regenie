@@ -12,7 +12,7 @@ import {
 export type SchemaType = 'full' | 'simple'
 
 // Define the different prompt types we might need
-export type PromptType = 'default' | 'identifier' | 'legal' | 'concise'
+export type PromptType = 'default' | 'identifier' | 'legal' | 'concise' | 'bookClub'
 
 // Define the response schema types for proper typing
 export type FullResponseSchema = z.ZodObject<{
