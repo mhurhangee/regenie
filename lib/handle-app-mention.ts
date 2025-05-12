@@ -31,8 +31,9 @@ export async function handleNewAppMention(
     // Pass channel ID for channel-specific prompts and use simple schema for app mentions
     const result = await generateResponse(messages, updateMessage, channel, 'simple')
 
-    // First update the message to clear the thinking status
-    await updateMessage('')
+    // Update the message with a space character to avoid the no_text error
+    // This message will be immediately replaced by the postMessageWithContext call
+    await updateMessage(' ')
 
     // Then post a new message with personality context
     // For app mentions in threads, we show personality context only for the first response
@@ -48,8 +49,9 @@ export async function handleNewAppMention(
       'simple'
     )
 
-    // First update the message to clear the thinking status
-    await updateMessage('Test')
+    // Update the message with a space character to avoid the no_text error
+    // This message will be immediately replaced by the postMessageWithContext call
+    await updateMessage(' ')
 
     // Then post a new message with personality context
     // This is the first message in a new thread, so we always show personality context
