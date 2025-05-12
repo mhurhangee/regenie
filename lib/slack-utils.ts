@@ -3,6 +3,7 @@ import { WebClient } from '@slack/web-api'
 import type { AppMentionEvent, FileShareMessageEvent } from '@slack/web-api'
 import { DEFAULT_AI_SETTINGS } from './constants'
 import { ERRORS } from './constants'
+import { CHANNEL_PROMPT_MAP, PERSONALITIES } from './prompts'
 import type { Message } from './types'
 
 const signingSecret = process.env.SLACK_SIGNING_SECRET || ''
@@ -160,7 +161,7 @@ export async function getThread(
       // Add text if it exists
       if (text) {
         contentItems.push({
-          type: 'input_text',
+          type: 'text',
           text: text,
         })
       }
@@ -178,17 +179,18 @@ export async function getThread(
           const fileData = await getFileContent(file.id)
 
           if (file.mimetype?.startsWith('image/')) {
-            // Handle image files
+            // Handle image files for AISDK
             contentItems.push({
-              type: 'input_image',
-              image_url: `data:${file.mimetype};base64,${fileData.toString('base64')}`,
+              type: 'image',
+              image: `data:${file.mimetype};base64,${fileData.toString('base64')}`,
             })
           } else if (file.mimetype === 'application/pdf') {
-            // Handle PDF files
+            // Handle PDF files for AISDK
             contentItems.push({
-              type: 'input_file',
+              type: 'file',
+              mimeType: 'application/pdf',
+              data: fileData,
               filename: file.name || 'file.pdf',
-              file_data: `data:application/pdf;base64,${fileData.toString('base64')}`,
             })
           }
           // Ignore other file types for now
@@ -255,4 +257,70 @@ export const getBotId = async () => {
   }
 
   return botUserId
+}
+
+/**
+ * Utility function for posting messages with personality context
+ * @param channel The channel to post to
+ * @param thread_ts The thread timestamp to reply to
+ * @param text The text of the message
+ * @param showPersonality Whether to show the personality context (defaults to true)
+ * @param isFirstInThread Whether this is the first message in the thread (defaults to false)
+ * @returns The result of the chat.postMessage call
+ */
+export const postMessageWithContext = async (
+  channel: string,
+  thread_ts: string,
+  text: string,
+  showPersonality = true,
+  isFirstInThread = false
+) => {
+  // Only show personality context if requested and it's the first message in a thread
+  // or if it's a direct message (which always uses the full schema)
+  if (!showPersonality || (!isFirstInThread && !channel.startsWith('D'))) {
+    return client.chat.postMessage({
+      channel,
+      thread_ts,
+      text,
+      unfurl_links: false,
+      blocks: [
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text,
+          },
+        },
+      ],
+    })
+  }
+
+  // Determine which personality is being used based on the channel
+  const promptType = CHANNEL_PROMPT_MAP[channel as keyof typeof CHANNEL_PROMPT_MAP] || 'default'
+  const personalityInfo = PERSONALITIES[promptType] || PERSONALITIES.default
+
+  return client.chat.postMessage({
+    channel,
+    thread_ts,
+    text,
+    unfurl_links: false,
+    blocks: [
+      {
+        type: 'context',
+        elements: [
+          {
+            type: 'mrkdwn',
+            text: `${personalityInfo.emoji} *${personalityInfo.name}*: ${personalityInfo.description}`,
+          },
+        ],
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text,
+        },
+      },
+    ],
+  })
 }

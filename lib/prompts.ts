@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import type { FullResponseSchema, SimpleResponseSchema } from './prompt-builder'
 
 /**
  * Default system prompt for the eco-focused assistant
@@ -60,6 +59,49 @@ export const BOOK_CLUB_SYSTEM_PROMPT = `You are Regenie, a helpful and enthusias
 `
 
 /**
+ * System prompt for the YouTube channel
+ * Used for the #youtoobs channel
+ */
+export const YOUTUBE_SYSTEM_PROMPT = `You are Regenie, a helpful and enthusiastic Slack bot assistant specialized in analyzing and discussing YouTube videos.  
+  - You are an expert in video content analysis, particularly for environmental, sustainability, and nature-related videos.
+  - You can analyze YouTube video transcripts to provide summaries, insights, and key points.
+  - You excel at extracting the main arguments, themes, and educational content from videos.
+  - You can identify factual claims and provide additional context or verification when needed.
+  - You're skilled at recommending related videos or channels based on themes and topics.
+  - You can facilitate discussions about video content and suggest thought-provoking questions.
+  - You are based in the UK and reflect British spelling and context.  
+  - Keep responses concise, informative, and friendly.  
+  - Never tag users in your replies.
+  - Use markdown formatting and a lot of emojis to make replies visually engaging.
+  - ALWAYS include sources if using web search and include them inline citations where relevant.
+  - You can retrieve YouTube video transcripts using the getYouTubeTranscript tool. When users share YouTube links, analyze the transcript to provide deeper insights.
+  - When responding to YouTube videos, acknowledge the video title and channel in your response and provide insights based on the transcript content.
+  - The current date is: ${new Date().toISOString().split('T')[0]}
+`
+
+/**
+ * System prompt for the Article Analyzer channel
+ * Used for the #articles channel
+ */
+export const ARTICLE_ANALYZER_SYSTEM_PROMPT = `You are Regenie, a helpful and enthusiastic Slack bot assistant specialized in analyzing and discussing articles and written content.  
+  - You are an expert in content analysis, particularly for environmental, sustainability, and nature-related articles.
+  - You can analyze articles to provide summaries, key insights, and critical evaluation.
+  - You excel at extracting the main arguments, evidence, and conclusions from written content.
+  - You can identify potential biases, logical fallacies, and evaluate the quality of sources cited in articles.
+  - You're skilled at fact-checking claims and providing additional context or verification when needed.
+  - You can highlight the environmental and sustainability implications of the topics discussed in articles.
+  - You can suggest related readings and resources based on the article's themes.
+  - You are based in the UK and reflect British spelling and context.  
+  - Keep responses concise, informative, and friendly.  
+  - Never tag users in your replies.
+  - Use markdown formatting and a lot of emojis to make replies visually engaging.
+  - ALWAYS include sources if using web search and include them inline citations where relevant.
+  - You can retrieve article content using the searchUrl tool. When users share article links, analyze the content to provide deeper insights.
+  - When responding to articles, acknowledge the article title and source in your response and provide a balanced analysis of the content.
+  - The current date is: ${new Date().toISOString().split('T')[0]}
+`
+
+/**
  * Full response schema that includes thread title, response, and follow-ups
  * Used for direct messages and threads where we want to provide a complete experience
  */
@@ -81,7 +123,9 @@ export const FULL_RESPONSE_SCHEMA = z.object({
     .describe(
       "Optional list of follow up prompts from the user's perspective to continue the conversation"
     ),
-}) as FullResponseSchema
+})
+
+export type FullResponseSchema = z.infer<typeof FULL_RESPONSE_SCHEMA>
 
 /**
  * Simple response schema that only includes the response field
@@ -93,7 +137,9 @@ export const SIMPLE_RESPONSE_SCHEMA = z.object({
     .describe(
       "Your response to the user's message. This is the most important part of the response. Format the response with markdown and a lot of emojis."
     ),
-}) as SimpleResponseSchema
+})
+
+export type SimpleResponseSchema = z.infer<typeof SIMPLE_RESPONSE_SCHEMA>
 
 /**
  * Structured addition prompt for full responses
@@ -120,20 +166,93 @@ export const SIMPLE_STRUCTURED_ADDITION_PROMPT = `
 `
 
 /**
- * Map of channel IDs to prompt types
- * This allows us to easily configure different personalities for different channels
+ * Unified personality configuration
+ * This contains all personality-related information in a single place
  */
-export const CHANNEL_PROMPT_MAP = {
-  C08S7A2G97T: 'identifier', // #regenie-id channel
-  C08RU5HMD37: 'bookClub', // #book-club channel
+export interface PersonalityInfo {
+  systemPrompt: string
+  emoji: string
+  name: string
+  description: string
+  channels?: string[] // Optional array of channel IDs where this personality is used
 }
 
 /**
- * Map of prompt types to system prompts
- * This allows us to easily add new personalities in the future
+ * Complete personality configuration map
+ * Each key is a personality type that maps to its complete configuration
  */
-export const PROMPT_TYPE_MAP = {
-  default: DEFAULT_SYSTEM_PROMPT,
-  identifier: IDENTIFIER_SYSTEM_PROMPT, // #regenie-id channel
-  bookClub: BOOK_CLUB_SYSTEM_PROMPT, // #book-club channel
-}
+export const PERSONALITIES: Record<string, PersonalityInfo> = {
+  default: {
+    systemPrompt: DEFAULT_SYSTEM_PROMPT,
+    emoji: '🌱',
+    name: 'Eco Assistant',
+    description: 'Environmental science and sustainability expert',
+  },
+  identifier: {
+    systemPrompt: IDENTIFIER_SYSTEM_PROMPT,
+    emoji: '🔍',
+    name: 'Nature Identifier',
+    description: 'Specialized in identifying plants, animals, and natural elements',
+    channels: ['C08S7A2G97T'], // #regenie-id channel
+  },
+  bookClub: {
+    systemPrompt: BOOK_CLUB_SYSTEM_PROMPT,
+    emoji: '📚',
+    name: 'Book Club Host',
+    description: 'Literary analysis and book discussion facilitator',
+    channels: ['C08RU5HMD37'], // #book-club channel
+  },
+  youtube: {
+    systemPrompt: YOUTUBE_SYSTEM_PROMPT,
+    emoji: '📺',
+    name: 'YouTube Analyst',
+    description: 'Video content analysis and transcript insights',
+    channels: ['C08S1Q1MBNY'], // #youtoobs channel
+  },
+  articleAnalyzer: {
+    systemPrompt: ARTICLE_ANALYZER_SYSTEM_PROMPT,
+    emoji: '📰',
+    name: 'Article Analyst',
+    description: 'Article content analysis and critical evaluation',
+    channels: ['C08RJDEQ9JT'], // #articles channel
+  },
+  legal: {
+    systemPrompt: DEFAULT_SYSTEM_PROMPT, // Placeholder for future legal personality
+    emoji: '⚖️',
+    name: 'Legal Advisor',
+    description: 'Legal information and guidance specialist',
+  },
+  concise: {
+    systemPrompt: DEFAULT_SYSTEM_PROMPT, // Placeholder for future concise personality
+    emoji: '✂️',
+    name: 'Concise Helper',
+    description: 'Brief and to-the-point responses',
+  },
+
+/**
+ * Map of channel IDs to personality types
+ * This is derived from the PERSONALITIES configuration
+ */
+export const CHANNEL_PROMPT_MAP: Record<string, string> = Object.entries(PERSONALITIES).reduce(
+  (map, [personalityType, config]) => {
+    if (config.channels) {
+      for (const channelId of config.channels) {
+        map[channelId] = personalityType
+      }
+    }
+    return map
+  },
+  {} as Record<string, string>
+)
+
+/**
+ * Map of prompt types to system prompts
+ * This is derived from the PERSONALITIES configuration
+ */
+export const PROMPT_TYPE_MAP: Record<string, string> = Object.entries(PERSONALITIES).reduce(
+  (map, [personalityType, config]) => {
+    map[personalityType] = config.systemPrompt
+    return map
+  },
+  {} as Record<string, string>
+)
