@@ -70,17 +70,19 @@ Regenie supports different personalities for different Slack channels. This allo
 - ✅ Add book club prompts.
 - ✅ Make adding channel specific personalities mapping easier and more logical
 - ✅ Include a backup for structured data (three attempts)
-- ⬜ Regenie to add .md (or .txt) files to threads with info it extracts?  Might be handy for tool results etc, because otherwise context of the URL may be lost as only the final messages are provided to the assistant.
-- ⬜ Add context to context element in each message with the personality of Regenie
+- ✅ Replace Exa with Tavily for URL extraction
+- ✅ Add apify youtube transcripts
+- ✅ Add context to context element in each message with the personality of Regenie
+- ⬜ Image generation tool
+- ⬜ Image editing tool
+- ⬜ Update home page
 - ⬜ Fun facts scheduled
 - ⬜ Fun facts random
 - ⬜ News scheduled
 - ⬜ News random
-- ⬜ Consider whether to trim first two messages (in assistant threads) as they are always the same
-- ⬜ Make structured data optional (i.e. allow for just text responses for app mentions etc)
 - ⬜ Add persona switching
-- ⬜ Better error handling for generateResponse
 - ⬜ News specific tool (Tavily?)
-- ⬜ YouTube search tool (YouTube Data API?)
+- ⬜ Consider whether to trim first two messages (in assistant threads) as they are always the same
 - ⬜ Add token limits under the guise of staying green
 - ⬜ Voice support
+- ⬜ Regenie to add .md (or .txt) files to threads with info it extracts?  Might be handy for tool results etc, because otherwise context of the URL may be lost as only the final messages are provided to the assistant.
