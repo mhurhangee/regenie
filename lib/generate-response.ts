@@ -10,7 +10,7 @@ import {
   SIMPLE_RESPONSE_SCHEMA,
   type SimpleResponseSchema,
 } from './prompts'
-import { getWeather, openaiWebSearchTool, searchUrl } from './tools'
+import { getWeather, getYouTubeTranscript, openaiWebSearchTool, searchUrl } from './tools'
 import type { Message } from './types'
 
 /**
@@ -52,6 +52,7 @@ export const generateResponse = async (
       tools: {
         getWeather: getWeather(updateStatus),
         searchUrl: searchUrl(updateStatus),
+        getYouTubeTranscript: getYouTubeTranscript(updateStatus),
         openaiWebSearchTool,
       },
       maxRetries: 3,
