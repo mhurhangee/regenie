@@ -2,7 +2,7 @@ import { openai } from '@ai-sdk/openai'
 import { tool } from 'ai'
 import { ApifyClient } from 'apify-client'
 import { z } from 'zod'
-import { exa } from './utils'
+import { exa, tavilyClient } from './utils'
 
 // Initialize the Apify client
 const apifyClient = new ApifyClient({
@@ -51,20 +51,46 @@ export function searchUrl(updateStatus?: (status: string) => void) {
       url: z.string(),
     }),
     execute: async ({ url }) => {
-      updateStatus?.(`is retrieving the contents of ${url}...`)
-      const { results } = await exa.getContents(url, {
-        text: {
-          maxCharacters: 10000,
-        },
-        livecrawl: 'always',
-      })
+      try {
+        updateStatus?.(`is retrieving the contents of ${url}...`)
 
-      return {
-        results: results.map((result) => ({
-          title: result.title,
-          url: result.url,
-          snippet: result.text,
-        })),
+        // Use Tavily to extract content from the URL
+        // The extract method requires URLs array and options object
+        const extractionResult = await tavilyClient.extract([url], {})
+
+        // Check if extraction was successful
+        if (
+          !extractionResult ||
+          !Array.isArray(extractionResult) ||
+          extractionResult.length === 0
+        ) {
+          return {
+            error: 'Failed to extract content from the URL',
+            results: [],
+          }
+        }
+
+        // Tavily extract returns an array of extraction results
+        const result = extractionResult[0]
+
+        return {
+          results: [
+            {
+              title: result.title || 'Unknown Title',
+              url: url,
+              snippet: result.text || '',
+              author: result.metadata?.author || 'Unknown Author',
+              published_date: result.metadata?.published_date || '',
+              source: result.source || '',
+            },
+          ],
+        }
+      } catch (error) {
+        console.error('Error extracting URL content:', error)
+        return {
+          error: 'Failed to extract content from the URL. Please check if the URL is valid.',
+          results: [],
+        }
       }
     },
   })
