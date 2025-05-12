@@ -1,4 +1,3 @@
-import type { z } from 'zod'
 import {
   CHANNEL_PROMPT_MAP,
   FULL_RESPONSE_SCHEMA,
@@ -7,6 +6,7 @@ import {
   SIMPLE_RESPONSE_SCHEMA,
   SIMPLE_STRUCTURED_ADDITION_PROMPT,
 } from './prompts'
+import type { FullResponseSchema, SimpleResponseSchema } from './prompts'
 
 // Define the different types of response schemas we might need
 export type SchemaType = 'full' | 'simple'
@@ -14,21 +14,10 @@ export type SchemaType = 'full' | 'simple'
 // Define the different prompt types we might need
 export type PromptType = 'default' | 'identifier' | 'legal' | 'concise' | 'bookClub'
 
-// Define the response schema types for proper typing
-export type FullResponseSchema = z.ZodObject<{
-  threadTitle: z.ZodString
-  response: z.ZodString
-  followUps: z.ZodArray<z.ZodString>
-}>
-
-export type SimpleResponseSchema = z.ZodObject<{
-  response: z.ZodString
-}>
-
 // Interface for the prompt and schema configuration
 export interface PromptConfig {
   systemPrompt: string
-  responseSchema: FullResponseSchema | SimpleResponseSchema
+  responseSchema: typeof FULL_RESPONSE_SCHEMA | typeof SIMPLE_RESPONSE_SCHEMA
   structuredAdditionPrompt: string
 }
 

@@ -1,18 +1,20 @@
-import OpenAI from 'openai'
-import { zodTextFormat } from 'openai/helpers/zod'
+import { openai } from '@ai-sdk/openai'
+import { Output, generateText } from 'ai'
 import slackifyMarkdown from 'slackify-markdown'
+import type { z } from 'zod'
 import { DEFAULT_AI_SETTINGS } from './constants'
 import { type SchemaType, buildPromptConfig } from './prompt-builder'
-import { openaiWebSearchTool } from './tools'
+import {
+  FULL_RESPONSE_SCHEMA,
+  type FullResponseSchema,
+  SIMPLE_RESPONSE_SCHEMA,
+  type SimpleResponseSchema,
+} from './prompts'
+import { getWeather, openaiWebSearchTool, searchUrl } from './tools'
 import type { Message } from './types'
 
-// Initialize the OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
-
 /**
- * Generates a response using OpenAI API with error handling and retry mechanism
+ * Generates a response using AI SDK with error handling and retry mechanism
  * @param messages Array of messages in the conversation
  * @param updateStatus Optional callback to update status during processing
  * @param channelId Optional channel ID to customize the system prompt
@@ -25,91 +27,71 @@ export const generateResponse = async (
   channelId?: string,
   schemaType: SchemaType = 'full'
 ) => {
-  const MAX_RETRIES = 3
-  const RETRY_DELAY = 1000 // 1 second delay between retries
+  try {
+    // Get the appropriate prompt configuration based on channel and schema type
+    const promptConfig = buildPromptConfig(channelId, schemaType)
 
-  // Get the appropriate prompt configuration based on channel and schema type
-  const promptConfig = buildPromptConfig(channelId, schemaType)
+    updateStatus?.(
+      DEFAULT_AI_SETTINGS.thinkingMessage[
+        Math.floor(Math.random() * DEFAULT_AI_SETTINGS.thinkingMessage.length)
+      ]
+    )
 
-  // Prepare system message
-  const systemMessage = {
-    role: 'system' as const,
-    content: `${promptConfig.systemPrompt}\n\n${promptConfig.structuredAdditionPrompt}`,
-  } as Message
+    // Call AI SDK generateText with tools
+    const result = await generateText({
+      model: openai(DEFAULT_AI_SETTINGS.model),
+      system: `${promptConfig.systemPrompt}\n\n${promptConfig.structuredAdditionPrompt}`,
+      maxTokens: DEFAULT_AI_SETTINGS.maxTokens,
+      temperature: DEFAULT_AI_SETTINGS.temperature,
+      messages,
+      // Define the output schema for AI SDK
+      experimental_output:
+        schemaType === 'simple'
+          ? Output.object({ schema: SIMPLE_RESPONSE_SCHEMA })
+          : Output.object({ schema: FULL_RESPONSE_SCHEMA }),
+      tools: {
+        getWeather: getWeather(updateStatus),
+        searchUrl: searchUrl(updateStatus),
+        openaiWebSearchTool,
+      },
+      maxRetries: 3,
+      maxSteps: 10,
+    })
 
-  // Prepare the input messages with system message first
-  const inputMessages = [systemMessage, ...messages] as Message[]
+    // Extract the experimental output from the result
+    const experimental_output = result.experimental_output as
+      | z.infer<typeof SIMPLE_RESPONSE_SCHEMA>
+      | z.infer<typeof FULL_RESPONSE_SCHEMA>
 
-  let lastError: Error | null = null
+    // Convert markdown to Slack mrkdwn format
+    const mrkdwnText = slackifyMarkdown(experimental_output.response)
 
-  // Implement retry logic
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-    try {
-      updateStatus?.(
-        DEFAULT_AI_SETTINGS.thinkingMessage[
-          Math.floor(Math.random() * DEFAULT_AI_SETTINGS.thinkingMessage.length)
-        ]
-      )
-
-      // Call OpenAI API
-      const response = await openai.responses.parse({
-        model: DEFAULT_AI_SETTINGS.model,
-        input: inputMessages,
-        temperature: DEFAULT_AI_SETTINGS.temperature,
-        max_output_tokens: DEFAULT_AI_SETTINGS.maxTokens,
-        tools: [{ type: 'web_search_preview' }],
-        text: {
-          format: zodTextFormat(promptConfig.responseSchema, 'response'),
-        },
-      })
-
-      // Extract the parsed output
-      const output = response.output_parsed
-
-      if (!output) {
-        throw new Error('Failed to parse response output')
-      }
-
-      // Convert markdown to Slack mrkdwn format
-      const mrkdwnText = slackifyMarkdown(output.response)
-
-      // Return appropriate response format based on schema type
-      if (schemaType === 'simple') {
-        return {
-          response: mrkdwnText,
-          // Include empty values for backward compatibility
-          threadTitle: '',
-          followUps: [],
-        }
-      }
-
-      // For full schema, we know the output has threadTitle and followUps properties
-      // Type assertion to help TypeScript understand the structure
-      const fullOutput = output as { threadTitle: string; response: string; followUps: string[] }
-
+    // Return appropriate response format based on schema type
+    if (schemaType === 'simple') {
       return {
-        threadTitle: fullOutput.threadTitle || '',
         response: mrkdwnText,
-        followUps: fullOutput.followUps || [],
-      }
-    } catch (error) {
-      lastError = error as Error
-      console.error(`Attempt ${attempt} failed:`, error)
-      updateStatus?.(`Hmm, that didn't work. Retrying... (${attempt}/${MAX_RETRIES})`)
-
-      // If not the last attempt, wait before retrying
-      if (attempt < MAX_RETRIES) {
-        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY * attempt)) // Exponential backoff
+        // Include empty values for backward compatibility
+        threadTitle: '',
+        followUps: [],
       }
     }
-  }
 
-  console.error('Failed to generate response after multiple attempts:', lastError)
+    // For full schema, cast to the full response type
+    const fullOutput = experimental_output as z.infer<typeof FULL_RESPONSE_SCHEMA>
 
-  return {
-    threadTitle: '',
-    response:
-      'Failed to generate response after multiple attempts. Please refresh the thread and try again. Or contact the admin.',
-    followUps: [],
+    return {
+      threadTitle: fullOutput.threadTitle || '',
+      response: mrkdwnText,
+      followUps: fullOutput.followUps || [],
+    }
+  } catch (error) {
+    console.error('Failed to generate response:', error)
+
+    return {
+      threadTitle: '',
+      response:
+        'Failed to generate response. Please refresh the thread and try again. Or contact the admin.',
+      followUps: [],
+    }
   }
 }

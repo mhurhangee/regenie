@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import type { FullResponseSchema, SimpleResponseSchema } from './prompt-builder'
 
 /**
  * Default system prompt for the eco-focused assistant
@@ -81,7 +80,9 @@ export const FULL_RESPONSE_SCHEMA = z.object({
     .describe(
       "Optional list of follow up prompts from the user's perspective to continue the conversation"
     ),
-}) as FullResponseSchema
+})
+
+export type FullResponseSchema = z.infer<typeof FULL_RESPONSE_SCHEMA>
 
 /**
  * Simple response schema that only includes the response field
@@ -93,7 +94,9 @@ export const SIMPLE_RESPONSE_SCHEMA = z.object({
     .describe(
       "Your response to the user's message. This is the most important part of the response. Format the response with markdown and a lot of emojis."
     ),
-}) as SimpleResponseSchema
+})
+
+export type SimpleResponseSchema = z.infer<typeof SIMPLE_RESPONSE_SCHEMA>
 
 /**
  * Structured addition prompt for full responses

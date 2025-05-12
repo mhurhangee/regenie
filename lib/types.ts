@@ -1,3 +1,3 @@
-import type { ResponseInputItem } from 'openai/resources/responses/responses'
+import type { CoreMessage } from 'ai'
 
-export type Message = ResponseInputItem
+export type Message = CoreMessage
