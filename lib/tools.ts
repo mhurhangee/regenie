@@ -38,31 +38,26 @@ export function getWeather(updateStatus?: (status: string) => void) {
   })
 }
 
-export function searchWeb(updateStatus?: (status: string) => void) {
+export function searchUrl(updateStatus?: (status: string) => void) {
   return tool({
-    description: 'Use this to search the web for information',
+    description: 'Use this to retrieve the contents of a user-provided URL',
     parameters: z.object({
-      query: z.string(),
-      specificDomain: z
-        .string()
-        .nullable()
-        .describe(
-          'a domain to search if the user specifies e.g. bbc.com. Should be only the domain name without the protocol'
-        ),
+      url: z.string(),
     }),
-    execute: async ({ query, specificDomain }) => {
-      updateStatus?.(`is searching the web for ${query}...`)
-      const { results } = await exa.searchAndContents(query, {
+    execute: async ({ url }) => {
+      updateStatus?.(`is retrieving the contents of ${url}...`)
+      const { results } = await exa.getContents(url, {
+        text: {
+          maxCharacters: 10000,
+        },
         livecrawl: 'always',
-        numResults: 3,
-        includeDomains: specificDomain ? [specificDomain] : undefined,
       })
 
       return {
         results: results.map((result) => ({
           title: result.title,
           url: result.url,
-          snippet: result.text.slice(0, 1000),
+          snippet: result.text,
         })),
       }
     },

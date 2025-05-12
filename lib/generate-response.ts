@@ -3,6 +3,7 @@ import { zodTextFormat } from 'openai/helpers/zod'
 import slackifyMarkdown from 'slackify-markdown'
 import { DEFAULT_AI_SETTINGS } from './constants'
 import { type SchemaType, buildPromptConfig } from './prompt-builder'
+import { openaiWebSearchTool } from './tools'
 import type { Message } from './types'
 
 // Initialize the OpenAI client
@@ -56,6 +57,7 @@ export const generateResponse = async (
         input: inputMessages,
         temperature: DEFAULT_AI_SETTINGS.temperature,
         max_output_tokens: DEFAULT_AI_SETTINGS.maxTokens,
+        tools: [{ type: 'web_search_preview' }],
         text: {
           format: zodTextFormat(promptConfig.responseSchema, 'response'),
         },
