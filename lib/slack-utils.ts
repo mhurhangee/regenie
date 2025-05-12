@@ -249,13 +249,13 @@ export async function getFileContent(fileId: string): Promise<Buffer> {
 }
 
 export const getBotId = async () => {
-  try {
-    const authTest = await client.auth.test()
-    return authTest.user_id
-  } catch (error) {
-    console.error('Error getting bot ID:', error)
-    return ''
+  const { user_id: botUserId } = await client.auth.test()
+
+  if (!botUserId) {
+    throw new Error('botUserId is undefined')
   }
+
+  return botUserId
 }
 
 /**

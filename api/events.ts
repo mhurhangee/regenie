@@ -23,6 +23,7 @@ export async function POST(request: Request) {
   await verifyRequest({ requestType, request, rawBody })
 
   try {
+    // Get the bot ID and ensure it's a string (fallback to empty string if undefined)
     const botUserId = await getBotId()
 
     const event = payload.event as SlackEvent
